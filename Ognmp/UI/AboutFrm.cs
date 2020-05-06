@@ -19,22 +19,30 @@
 
 using System;
 using System.Windows.Forms;
-using Ognmp.UI;
+using Ognmp.Properties;
 
-namespace Ognmp
+namespace Ognmp.UI
 {
-    public static class Program
+    public partial class AboutFrm : Form
     {
-        public static readonly string StartupPath = Application.StartupPath;
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        public AboutFrm()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainFrm());
+            InitializeComponent();
+        }
+
+        private void AboutFrm_Load(object sender, EventArgs e)
+        {
+            wnmpversionLabel.Text = Resources.AboutFrm_Wnmp_Version__ + Application.ProductVersion;
+        }
+
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void wnmpWebsiteLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Misc.StartProcessAsync("https://wnmp.x64architecture.com");
         }
     }
 }

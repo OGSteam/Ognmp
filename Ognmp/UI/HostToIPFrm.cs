@@ -18,23 +18,33 @@
  */
 
 using System;
+using System.Net;
 using System.Windows.Forms;
-using Ognmp.UI;
 
-namespace Ognmp
+namespace Ognmp.UI
 {
-    public static class Program
+    public partial class HostToIPFrm : Form
     {
-        public static readonly string StartupPath = Application.StartupPath;
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        public HostToIPFrm()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainFrm());
+            InitializeComponent();
+        }
+
+        private void HostToIpButton_Click(object sender, EventArgs e)
+        {
+            ipAddressesListBox.Items.Clear();
+            try {
+                IPAddress[] IPs = Dns.GetHostAddresses(hostTextBox.Text);
+                foreach (var IP in IPs)
+                    ipAddressesListBox.Items.Add(IP.ToString());
+            } catch (Exception ex) {
+                Log.Error(ex.Message);
+            }
+        }
+
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }

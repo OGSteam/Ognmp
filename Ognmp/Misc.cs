@@ -18,23 +18,26 @@
  */
 
 using System;
-using System.Windows.Forms;
-using Ognmp.UI;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Ognmp
 {
-    public static class Program
+    public class Misc
     {
-        public static readonly string StartupPath = Application.StartupPath;
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        public static void StartProcessAsync(string filename, string args = "")
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainFrm());
+            new Thread(() => {
+                Process.Start(filename, args);
+            }).Start();
+        }
+        public static void OpenFileEditor(string file)
+        {
+            try {
+                Process.Start(Properties.Settings.Default.TextEditor, file);
+            } catch (Exception ex) {
+                Log.Error(ex.Message);
+            }
         }
     }
 }
