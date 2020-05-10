@@ -1,0 +1,5 @@
+Welcome to Ognmp!
+-------------------
+
+For configuration and usage directions, please read the README.md
+file that comes with this package.

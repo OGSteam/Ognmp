@@ -338,3 +338,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+compiledsetup/Ognmp-0.0.1.exe
+nginx.exe
+vc_redist.x64.exe
