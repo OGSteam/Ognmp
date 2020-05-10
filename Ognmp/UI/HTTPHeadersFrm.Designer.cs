@@ -45,6 +45,7 @@
             this.HTTPValue});
             this.httpHeadersListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.httpHeadersListView.FullRowSelect = true;
+            this.httpHeadersListView.HideSelection = false;
             this.httpHeadersListView.Location = new System.Drawing.Point(0, 27);
             this.httpHeadersListView.Name = "httpHeadersListView";
             this.httpHeadersListView.Size = new System.Drawing.Size(326, 307);
@@ -82,6 +83,7 @@
             // 
             // urlTextBox
             // 
+            this.urlTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.urlTextBox.Name = "urlTextBox";
             this.urlTextBox.Size = new System.Drawing.Size(200, 23);
             this.urlTextBox.ToolTipText = "URL";

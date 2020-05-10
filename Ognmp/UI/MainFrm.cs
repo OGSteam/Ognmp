@@ -213,7 +213,7 @@ namespace Ognmp.UI
             cm.MenuItems.Add(exit);
             cm.MenuItems.Add("-");
             ni.ContextMenu = cm;
-            ni.Icon = Properties.Resources.logo;
+            ni.Icon = Properties.Resources.Ognmp;
             ni.Click += (s, e) =>
             {
                 _visiblecore = true;
@@ -465,6 +465,11 @@ namespace Ognmp.UI
         private void OpenMariaDBShellButton_Click(object sender, EventArgs e)
         {
             _mariaDb.OpenShell();
+        }
+
+        private void WnmpMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
         }
 
         private void WnmpDirButton_Click(object sender, EventArgs e)

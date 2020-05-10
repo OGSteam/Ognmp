@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AboutFrm));
             this.AboutTabCtrl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.wnmpWebsiteLabel = new System.Windows.Forms.LinkLabel();
             this.copyrightLabel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -61,6 +63,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.label2);
+            this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.wnmpWebsiteLabel);
             this.tabPage1.Controls.Add(this.copyrightLabel);
             this.tabPage1.Controls.Add(this.pictureBox1);
@@ -75,22 +79,42 @@
             this.tabPage1.Text = "Version";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(364, 229);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(258, 18);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "Copyright (c) 2019 - 2020 OGSteam.fr";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F);
+            this.label1.Location = new System.Drawing.Point(142, 101);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(267, 16);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "to be used by OGSteam dev and test teams";
+            // 
             // wnmpWebsiteLabel
             // 
             this.wnmpWebsiteLabel.AutoSize = true;
-            this.wnmpWebsiteLabel.Location = new System.Drawing.Point(214, 197);
+            this.wnmpWebsiteLabel.Location = new System.Drawing.Point(276, 136);
             this.wnmpWebsiteLabel.Name = "wnmpWebsiteLabel";
-            this.wnmpWebsiteLabel.Size = new System.Drawing.Size(246, 20);
+            this.wnmpWebsiteLabel.Size = new System.Drawing.Size(133, 20);
             this.wnmpWebsiteLabel.TabIndex = 6;
             this.wnmpWebsiteLabel.TabStop = true;
-            this.wnmpWebsiteLabel.Text = "https://wnmp.x64architecture.com";
+            this.wnmpWebsiteLabel.Text = "https://ogsteam.fr";
             this.wnmpWebsiteLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.wnmpWebsiteLabel_LinkClicked);
             // 
             // copyrightLabel
             // 
             this.copyrightLabel.AutoSize = true;
             this.copyrightLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.copyrightLabel.Location = new System.Drawing.Point(191, 170);
+            this.copyrightLabel.Location = new System.Drawing.Point(6, 229);
             this.copyrightLabel.Name = "copyrightLabel";
             this.copyrightLabel.Size = new System.Drawing.Size(287, 18);
             this.copyrightLabel.TabIndex = 4;
@@ -98,7 +122,6 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(8, 46);
             this.pictureBox1.MaximumSize = new System.Drawing.Size(128, 128);
             this.pictureBox1.MinimumSize = new System.Drawing.Size(128, 128);
@@ -113,9 +136,9 @@
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(142, 85);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(422, 16);
+            this.label3.Size = new System.Drawing.Size(394, 16);
             this.label3.TabIndex = 2;
-            this.label3.Text = "Wnmp is an easy Nginx, MariaDB, and PHP environment for Windows.";
+            this.label3.Text = "Ognmp is an Nginx, MariaDB, and PHP environment for Windows.";
             // 
             // wnmpversionLabel
             // 
@@ -123,9 +146,9 @@
             this.wnmpversionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.wnmpversionLabel.Location = new System.Drawing.Point(6, 15);
             this.wnmpversionLabel.Name = "wnmpversionLabel";
-            this.wnmpversionLabel.Size = new System.Drawing.Size(123, 18);
+            this.wnmpversionLabel.Size = new System.Drawing.Size(134, 18);
             this.wnmpversionLabel.TabIndex = 0;
-            this.wnmpversionLabel.Text = "Wnmp Version:";
+            this.wnmpversionLabel.Text = "Ognmp Version :";
             // 
             // tabPage2
             // 
@@ -148,7 +171,8 @@
             this.richTextBox2.ReadOnly = true;
             this.richTextBox2.Size = new System.Drawing.Size(651, 244);
             this.richTextBox2.TabIndex = 0;
-            this.richTextBox2.Text = "Developers\n=========\nKurt Cancemi <kurt@x64architecture.com>";
+            this.richTextBox2.Text = "Developers OGSteam.fr\n=========\nDarkNoon <darknoon@darkcity.fr>\n\n\n\nDevelopers Wnm" +
+    "p\n=========\nKurt Cancemi <kurt@x64architecture.com>";
             // 
             // License
             // 
@@ -212,12 +236,14 @@
         private System.Windows.Forms.Label copyrightLabel;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label wnmpversionLabel;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.RichTextBox richTextBox2;
         private System.Windows.Forms.TabPage License;
         private System.Windows.Forms.RichTextBox licenseRichTextBox;
         private System.Windows.Forms.Button CloseButton;
         private System.Windows.Forms.LinkLabel wnmpWebsiteLabel;
+        private System.Windows.Forms.Label wnmpversionLabel;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }

@@ -141,9 +141,9 @@
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(25, 170);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(111, 13);
+            this.label13.Size = new System.Drawing.Size(77, 13);
             this.label13.TabIndex = 23;
-            this.label13.Text = "Start Wnmp minimized";
+            this.label13.Text = "Start minimized";
             // 
             // MinimizeToTrayInsteadOfClosing
             // 
@@ -250,9 +250,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(25, 50);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(132, 13);
+            this.label2.Size = new System.Drawing.Size(98, 13);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Start Wnmp with Windows";
+            this.label2.Text = "Start with Windows";
             // 
             // editorTB
             // 

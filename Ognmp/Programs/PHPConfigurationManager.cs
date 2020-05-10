@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Ognmp.Configuration
+namespace Ognmp.Programs
 {
     public class PhpConfigurationManager
     {

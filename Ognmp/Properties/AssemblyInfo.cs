@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Kurt Cancemi")]
 [assembly: AssemblyProduct("Control Panel")]
-[assembly: AssemblyCopyright("Copyright © 2012 - 2019 OGSteam")]
+[assembly: AssemblyCopyright("Copyright © 2020 OGSteam")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

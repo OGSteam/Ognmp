@@ -22,8 +22,8 @@ using System.IO;
 using System.Windows.Forms;
 using System.Linq;
 using Microsoft.Win32;
+using Ognmp.Programs;
 using Ognmp.UI;
-using Ognmp.Configuration;
 
 namespace Ognmp.UI
 {
