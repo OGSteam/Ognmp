@@ -1,52 +1,86 @@
-﻿/*
- * Copyright (c) 2012 - 2017, Kurt Cancemi (kurt@x64architecture.com)
- *
- * This file is part of Wnmp.
- *
- *  Wnmp is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  Wnmp is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with Wnmp.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// /*
+//  * Copyright (c) 2012 - 2017, Kurt Cancemi (kurt@x64architecture.com)
+//  * Copyright (c) 2017 - 2020, OGSteam.fr (darknoon@darkcity.fr)
+//  *
+//  * This file is part of Ognmp.
+//  *
+//  *  Ognmp is free software: you can redistribute it and/or modify
+//  *  it under the terms of the GNU General Public License as published by
+//  *  the Free Software Foundation, either version 3 of the License, or
+//  *  (at your option) any later version.
+//  *
+//  *  Ognmp is distributed in the hope that it will be useful,
+//  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  *  GNU General Public License for more details.
+//  *
+//  *  You should have received a copy of the GNU General Public License
+//  *  along with Ognmp.  If not, see <http://www.gnu.org/licenses/>.
+// */
 
 using System;
 using System.Drawing;
 using System.IO;
-//using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Ognmp.Programs;
+using Ognmp.Properties; //using System.Text.RegularExpressions;
 
 namespace Ognmp.UI
 {
     public partial class MainFrm : Form
     {
+        private readonly NotifyIcon ni = new NotifyIcon();
+        private MariaDbProgram _mariaDb;
+        private ContextMenuStrip _mariaDbConfigContextMenuStrip, _mariaDbLogContextMenuStrip;
+
+        private NginxProgram _nginx;
+
+        private ContextMenuStrip _nginxConfigContextMenuStrip, _nginxLogContextMenuStrip;
+        private PhpProgram _php;
+        private ContextMenuStrip _phpConfigContextMenuStrip, _phpLogContextMenuStrip;
+        private bool _visiblecore = true;
+
+        public MainFrm()
+        {
+            if (Settings.Default.StartMinimizedToTray)
+            {
+                Visible = false;
+                Hide();
+            }
+
+            InitializeComponent();
+            Log.SetLogComponent(logRichTextBox);
+            Log.Notice("Initializing Control Panel");
+            Log.Notice("Ognmp Version: " + Application.ProductVersion);
+            Log.Notice("Ognmp Directory: " + Program.StartupPath);
+            SetupNginx();
+            SetupMariaDb();
+            SetupPhp();
+            SetupConfigAndLogMenuStrips();
+            SetupTrayMenu();
+
+            if (Settings.Default.StartMinimizedToTray)
+            {
+                _visiblecore = false;
+                base.SetVisibleCore(false);
+            }
+
+            if (Settings.Default.StartNginxOnLaunch) _nginx.Start();
+
+            if (Settings.Default.StartMariaDBOnLaunch) _mariaDb.Start();
+
+            if (Settings.Default.StartPHPOnLaunch) _php.Start();
+        }
+
         protected override CreateParams CreateParams
         {
             get
             {
-                CreateParams cp = base.CreateParams;
+                var cp = base.CreateParams;
                 cp.Style &= ~0x00040000; // Remove WS_THICKFRAME (Disables resizing)
                 return cp;
             }
         }
-
-        NginxProgram _nginx;
-        MariaDBProgram _mariaDb;
-        PHPProgram _php;
-
-        ContextMenuStrip _nginxConfigContextMenuStrip, _nginxLogContextMenuStrip;
-        ContextMenuStrip _mariaDbConfigContextMenuStrip, _mariaDbLogContextMenuStrip;
-        ContextMenuStrip _phpConfigContextMenuStrip, _phpLogContextMenuStrip;
-        private NotifyIcon ni = new NotifyIcon();
-        private bool _visiblecore = true;
 
         private void SetupNginx()
         {
@@ -55,21 +89,20 @@ namespace Ognmp.UI
                 ProgLogSection = Log.LogSection.Nginx,
                 StartArgs = "",
                 StopArgs = "-s stop",
-                confDir = Program.StartupPath + "\\conf\\",
-                sslDir = Program.StartupPath + "\\ssl\\",
-                logDir = Program.StartupPath + "\\logs\\"
+                ConfDir = Program.StartupPath + "\\conf\\",
+                LogDir = Program.StartupPath + "\\logs\\"
             };
         }
 
         private void SetupMariaDb()
         {
-            _mariaDb = new MariaDBProgram(Program.StartupPath + "\\mariadb\\bin\\mysqld.exe")
+            _mariaDb = new MariaDbProgram(Program.StartupPath + "\\mariadb\\bin\\mysqld.exe")
             {
-                ProgLogSection = Log.LogSection.MariaDB,
+                ProgLogSection = Log.LogSection.MariaDb,
                 StartArgs = "--install-manual Wnmp-MariaDB",
                 StopArgs = "/c sc delete Wnmp-MariaDB",
-                confDir = Program.StartupPath + "\\mariadb\\",
-                logDir = Program.StartupPath + "\\mariadb\\data\\"
+                ConfDir = Program.StartupPath + "\\mariadb\\",
+                LogDir = Program.StartupPath + "\\mariadb\\data\\"
             };
         }
 
@@ -102,7 +135,7 @@ namespace Ognmp.UI
         }*/
 
         /// <summary>
-        /// Adds configuration files or log files to a context menu strip
+        ///     Adds configuration files or log files to a context menu strip
         /// </summary>
         private void DirFiles(string path, string getFiles, ContextMenuStrip cms)
         {
@@ -112,10 +145,7 @@ namespace Ognmp.UI
                 return;
 
             var files = dInfo.GetFiles(getFiles);
-            foreach (var file in files)
-            {
-                cms.Items.Add(file.Name);
-            }
+            foreach (var file in files) cms.Items.Add(file.Name);
         }
 
         private void SetupConfigAndLogMenuStrips()
@@ -123,69 +153,53 @@ namespace Ognmp.UI
             _nginxConfigContextMenuStrip = new ContextMenuStrip();
             _nginxConfigContextMenuStrip.ItemClicked += (s, e) =>
             {
-                Misc.OpenFileEditor(_nginx.confDir + e.ClickedItem);
+                Misc.OpenFileEditor(_nginx.ConfDir + e.ClickedItem);
             };
             _nginxLogContextMenuStrip = new ContextMenuStrip();
-            _nginxLogContextMenuStrip.ItemClicked += (s, e) => { Misc.OpenFileEditor(_nginx.logDir + e.ClickedItem); };
+            _nginxLogContextMenuStrip.ItemClicked += (s, e) => { Misc.OpenFileEditor(_nginx.LogDir + e.ClickedItem); };
             _mariaDbConfigContextMenuStrip = new ContextMenuStrip();
             _mariaDbConfigContextMenuStrip.ItemClicked += (s, e) =>
             {
-                Misc.OpenFileEditor(_mariaDb.confDir + e.ClickedItem);
+                Misc.OpenFileEditor(_mariaDb.ConfDir + e.ClickedItem);
             };
             _mariaDbLogContextMenuStrip = new ContextMenuStrip();
             _mariaDbLogContextMenuStrip.ItemClicked += (s, e) =>
             {
-                Misc.OpenFileEditor(_mariaDb.logDir + e.ClickedItem);
+                Misc.OpenFileEditor(_mariaDb.LogDir + e.ClickedItem);
             };
             _phpConfigContextMenuStrip = new ContextMenuStrip();
-            _phpConfigContextMenuStrip.ItemClicked += (s, e) => { Misc.OpenFileEditor(_php.confDir + e.ClickedItem); };
+            _phpConfigContextMenuStrip.ItemClicked += (s, e) => { Misc.OpenFileEditor(_php.ConfDir + e.ClickedItem); };
             _phpLogContextMenuStrip = new ContextMenuStrip();
-            _phpLogContextMenuStrip.ItemClicked += (s, e) => { Misc.OpenFileEditor(_php.logDir + e.ClickedItem); };
-            DirFiles(_nginx.confDir, "*.conf", _nginxConfigContextMenuStrip);
-            DirFiles(_mariaDb.confDir, "my.ini", _mariaDbConfigContextMenuStrip);
-            DirFiles(_php.confDir, "php.ini", _phpConfigContextMenuStrip);
-            DirFiles(_nginx.logDir, "*.log", _nginxLogContextMenuStrip);
-            DirFiles(_mariaDb.logDir, "*.err", _mariaDbLogContextMenuStrip);
-            DirFiles(_php.logDir, "*.log", _phpLogContextMenuStrip);
+            _phpLogContextMenuStrip.ItemClicked += (s, e) => { Misc.OpenFileEditor(_php.LogDir + e.ClickedItem); };
+            DirFiles(_nginx.ConfDir, "*.conf", _nginxConfigContextMenuStrip);
+            DirFiles(_mariaDb.ConfDir, "my.ini", _mariaDbConfigContextMenuStrip);
+            DirFiles(_php.ConfDir, "php.ini", _phpConfigContextMenuStrip);
+            DirFiles(_nginx.LogDir, "*.log", _nginxLogContextMenuStrip);
+            DirFiles(_mariaDb.LogDir, "*.err", _mariaDbLogContextMenuStrip);
+            DirFiles(_php.LogDir, "*.log", _phpLogContextMenuStrip);
         }
 
         public void SetupPhp()
         {
-            string phpVersion = Properties.Settings.Default.PHPVersion;
-            _php = new PHPProgram(Program.StartupPath + "\\php\\" + phpVersion + "\\php-cgi.exe")
+            var phpVersion = Settings.Default.PHPVersion;
+            _php = new PhpProgram(Program.StartupPath + "\\php\\" + phpVersion + "\\php-cgi.exe")
             {
-                ProgLogSection = Log.LogSection.PHP,
-                confDir = Program.StartupPath + "\\php\\" + phpVersion + "\\",
-                logDir = Program.StartupPath + "\\php\\" + phpVersion + "\\logs\\",
+                ProgLogSection = Log.LogSection.Php,
+                ConfDir = Program.StartupPath + "\\php\\" + phpVersion + "\\",
+                LogDir = Program.StartupPath + "\\php\\" + phpVersion + "\\logs\\"
             };
         }
 
-        private void GenerateCertificates()
-        {
-            string confDir = Program.StartupPath + "\\conf";
-            string sslDir = Program.StartupPath + "\\ssl";
-
-            if (!Directory.Exists(confDir))
-                Directory.CreateDirectory(confDir);
-
-            string keyFile = sslDir + "\\key.pem";
-            string certFile = confDir + "\\cert.pem";
-
-            if (File.Exists(keyFile) && File.Exists(certFile))
-                return;
-
-            _nginx.GenerateSslKeyPair();
-        }
 
         private MenuItem CreateWnmpProgramMenuItem(OgnmpProgram prog)
         {
-            MenuItem item = new MenuItem {Text = Log.LogSectionToString(prog.ProgLogSection)};
+            var item = new MenuItem {Text = Log.LogSectionToString(prog.ProgLogSection)};
 
-            MenuItem start = item.MenuItems.Add("Start");
+            var start = item.MenuItems.Add("Start");
             start.Click += (s, e) => { prog.Start(); };
-            MenuItem stop = item.MenuItems.Add("Stop");
+            var stop = item.MenuItems.Add("Stop");
             stop.Click += (s, e) => { prog.Stop(); };
-            MenuItem restart = item.MenuItems.Add("Restart");
+            var restart = item.MenuItems.Add("Restart");
             restart.Click += (s, e) => { prog.Restart(); };
 
             return item;
@@ -193,7 +207,7 @@ namespace Ognmp.UI
 
         private void SetupTrayMenu()
         {
-            MenuItem controlpanel = new MenuItem("Ognmp Control Panel");
+            var controlpanel = new MenuItem("Ognmp Control Panel");
             controlpanel.Click += (s, e) =>
             {
                 _visiblecore = true;
@@ -201,19 +215,19 @@ namespace Ognmp.UI
                 WindowState = FormWindowState.Normal;
                 Show();
             };
-            ContextMenu cm = new ContextMenu();
+            var cm = new ContextMenu();
             cm.MenuItems.Add(controlpanel);
             cm.MenuItems.Add("-");
             cm.MenuItems.Add(CreateWnmpProgramMenuItem(_nginx));
             cm.MenuItems.Add(CreateWnmpProgramMenuItem(_mariaDb));
             cm.MenuItems.Add(CreateWnmpProgramMenuItem(_php));
             cm.MenuItems.Add("-");
-            MenuItem exit = new MenuItem("Exit");
+            var exit = new MenuItem("Exit");
             exit.Click += (s, e) => { Application.Exit(); };
             cm.MenuItems.Add(exit);
             cm.MenuItems.Add("-");
             ni.ContextMenu = cm;
-            ni.Icon = Properties.Resources.Ognmp;
+            ni.Icon = Resources.Ognmp;
             ni.Click += (s, e) =>
             {
                 _visiblecore = true;
@@ -234,48 +248,6 @@ namespace Ognmp.UI
             }
 
             base.SetVisibleCore(value);
-        }
-
-        public MainFrm()
-        {
-            if (Properties.Settings.Default.StartMinimizedToTray)
-            {
-                Visible = false;
-                Hide();
-            }
-
-            InitializeComponent();
-            Log.SetLogComponent(logRichTextBox);
-            Log.Notice("Initializing Control Panel");
-            Log.Notice("Wnmp Version: " + Application.ProductVersion);
-            Log.Notice("Wnmp Directory: " + Program.StartupPath);
-            SetupNginx();
-            SetupMariaDb();
-            SetupPhp();
-            SetupConfigAndLogMenuStrips();
-            SetupTrayMenu();
-            GenerateCertificates();
-
-            if (Properties.Settings.Default.StartMinimizedToTray)
-            {
-                _visiblecore = false;
-                base.SetVisibleCore(false);
-            }
-
-            if (Properties.Settings.Default.StartNginxOnLaunch)
-            {
-                _nginx.Start();
-            }
-
-            if (Properties.Settings.Default.StartMariaDBOnLaunch)
-            {
-                _mariaDb.Start();
-            }
-
-            if (Properties.Settings.Default.StartPHPOnLaunch)
-            {
-                _php.Start();
-            }
         }
 
         /* Menu */
@@ -380,7 +352,7 @@ namespace Ognmp.UI
 
         /* */
 
-        public void StopAll()
+        private void StopAll()
         {
             _nginx.Stop();
             _mariaDb.Stop();
@@ -401,7 +373,7 @@ namespace Ognmp.UI
 
         private void GetHTTPHeadersToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            HTTPHeadersFrm httpHeadersFrm = new HTTPHeadersFrm()
+            var httpHeadersFrm = new HttpHeadersFrm()
             {
                 StartPosition = FormStartPosition.CenterParent
             };
@@ -410,7 +382,7 @@ namespace Ognmp.UI
 
         private void HostToIPToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            HostToIPFrm hostToIpFrm = new HostToIPFrm()
+            var hostToIpFrm = new HostToIpFrm()
             {
                 StartPosition = FormStartPosition.CenterParent
             };
@@ -469,7 +441,6 @@ namespace Ognmp.UI
 
         private void WnmpMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-
         }
 
         private void WnmpDirButton_Click(object sender, EventArgs e)
@@ -479,20 +450,20 @@ namespace Ognmp.UI
 
         private void MainFrm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (e.CloseReason == CloseReason.UserClosing && Properties.Settings.Default.MinimizeInsteadOfClosing)
+            if (e.CloseReason == CloseReason.UserClosing && Settings.Default.MinimizeInsteadOfClosing)
             {
                 e.Cancel = true;
                 Hide();
             }
             else
             {
-                Properties.Settings.Default.Save();
+                Settings.Default.Save();
             }
         }
 
         private void MainFrm_Resize(object sender, EventArgs e)
         {
-            if (Properties.Settings.Default.MinimizeToTray == false)
+            if (Settings.Default.MinimizeToTray == false)
                 return;
 
             if (WindowState == FormWindowState.Minimized)

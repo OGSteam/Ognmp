@@ -1,6 +1,6 @@
 ﻿namespace Ognmp.UI
 {
-    partial class HTTPHeadersFrm
+    partial class HttpHeadersFrm
     {
         /// <summary>
         /// Required designer variable.
@@ -27,7 +27,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HTTPHeadersFrm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HttpHeadersFrm));
             this.httpHeadersListView = new System.Windows.Forms.ListView();
             this.HTTPHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.HTTPValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -96,7 +96,7 @@
             this.Controls.Add(this.httpHeadersListView);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "HTTPHeadersFrm";
+            this.Name = "HttpHeadersFrm";
             this.Text = "Get HTTP Headers";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

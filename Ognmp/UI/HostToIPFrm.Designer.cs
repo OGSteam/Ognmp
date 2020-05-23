@@ -1,6 +1,6 @@
 ﻿namespace Ognmp.UI
 {
-    partial class HostToIPFrm
+    partial class HostToIpFrm
     {
         /// <summary>
         /// Required designer variable.
@@ -27,7 +27,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HostToIPFrm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HostToIpFrm));
             this.ipAddressesListBox = new System.Windows.Forms.ListBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -102,7 +102,7 @@
             this.Controls.Add(this.hostTextBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "HostToIPFrm";
+            this.Name = "HostToIpFrm";
             this.Text = "Host To IP";
             this.ResumeLayout(false);
             this.PerformLayout();
