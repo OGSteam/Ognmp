@@ -62,13 +62,13 @@ Source: conf\uwsgi_params; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\win-utf; DestDir: {app}\conf; Flags: ignoreversion
 Source: contrib\*; DestDir: {app}\contrib; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: logs\*; Excludes: ".gitignore"; DestDir: {app}\logs; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: mariadb\bin\*; Excludes: ".gitignore"; DestDir: {app}\mariadb\bin; Flags: ignoreversion
+Source: mariadb\bin\*; Excludes: ".gitignore,*.pdb"; DestDir: {app}\mariadb\bin; Flags: ignoreversion
 Source: mariadb\data\*; Excludes: ".gitignore"; DestDir: {app}\mariadb\data; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: mariadb\include\*; Excludes: ".gitignore"; DestDir: {app}\mariadb\include; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: mariadb\share\*; Excludes: ".gitignore"; DestDir: {app}\mariadb\share; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: php\*; DestDir: {app}\php; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: html\*; DestDir: {app}\html; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: temp\*; DestDir: {app}\temp; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: php\*; DestDir: {app}\php; Excludes: ".gitignore,*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: html\*; DestDir: {app}\html; Excludes: ".gitignore"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: temp\*; DestDir: {app}\temp; Excludes: ".gitignore"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: nginx.exe; DestDir: {app}; Flags: ignoreversion
 Source: README.md; DestDir: {app}; Flags: ignoreversion
 Source: "vc_redist.x64.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall
@@ -83,3 +83,4 @@ Name: {commondesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desk
 [Run]
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}; Flags: nowait postinstall shellexec
 Filename: "{tmp}\vc_redist.x64.exe"; Parameters: "/install /passive /norestart"
+Filename: "{app}\mariadb\bin\mysql_install_db.exe"; Parameters: "--password=password"
