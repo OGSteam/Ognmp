@@ -29,7 +29,7 @@ namespace Ognmp.UI
 {
     public partial class MainFrm : Form
     {
-        private readonly NotifyIcon ni = new NotifyIcon();
+        private readonly NotifyIcon _ni = new NotifyIcon();
         private MariaDbProgram _mariaDb;
         private ContextMenuStrip _mariaDbConfigContextMenuStrip, _mariaDbLogContextMenuStrip;
 
@@ -99,8 +99,8 @@ namespace Ognmp.UI
             _mariaDb = new MariaDbProgram(Program.StartupPath + "\\mariadb\\bin\\mysqld.exe")
             {
                 ProgLogSection = Log.LogSection.MariaDb,
-                StartArgs = "--install-manual Wnmp-MariaDB",
-                StopArgs = "/c sc delete Wnmp-MariaDB",
+                StartArgs = "--install-manual Ognmp-MariaDB",
+                StopArgs = "/c sc delete Ognmp-MariaDB",
                 ConfDir = Program.StartupPath + "\\mariadb\\",
                 LogDir = Program.StartupPath + "\\mariadb\\data\\"
             };
@@ -226,16 +226,16 @@ namespace Ognmp.UI
             exit.Click += (s, e) => { Application.Exit(); };
             cm.MenuItems.Add(exit);
             cm.MenuItems.Add("-");
-            ni.ContextMenu = cm;
-            ni.Icon = Resources.Ognmp;
-            ni.Click += (s, e) =>
+            _ni.ContextMenu = cm;
+            _ni.Icon = Resources.Ognmp;
+            _ni.Click += (s, e) =>
             {
                 _visiblecore = true;
                 base.SetVisibleCore(true);
                 WindowState = FormWindowState.Normal;
                 Show();
             };
-            ni.Visible = true;
+            _ni.Visible = true;
         }
 
         protected override void SetVisibleCore(bool value)

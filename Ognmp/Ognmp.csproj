@@ -38,6 +38,12 @@
   <PropertyGroup>
     <ApplicationIcon>OGnmp.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>ogsteam.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -110,6 +116,7 @@
     <EmbeddedResource Include="UI\OptionsFrm.resx">
       <DependentUpon>OptionsFrm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="ogsteam.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

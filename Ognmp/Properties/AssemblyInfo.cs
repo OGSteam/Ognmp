@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Ognmp Control Panel")]
 [assembly: AssemblyDescription("Windows, Nginx, MariaDB & PHP Control Panel")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Kurt Cancemi")]
+[assembly: AssemblyCompany("OGSteam.fr")]
 [assembly: AssemblyProduct("Control Panel")]
 [assembly: AssemblyCopyright("Copyright © 2020 OGSteam")]
 [assembly: AssemblyTrademark("")]

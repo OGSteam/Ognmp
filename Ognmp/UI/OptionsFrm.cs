@@ -70,7 +70,6 @@ namespace Ognmp.UI
             PHP_PROCESSES.Value = Settings.Default.PHPProcessCount;
             PHP_PORT.Value = Settings.Default.PHPPort;
             MinimizeToTrayInsteadOfClosing.Checked = Settings.Default.MinimizeInsteadOfClosing;
-            phpBin.Items.Add("Default");
             foreach (var str in PhpVersions()) phpBin.Items.Add(str);
 
             phpBin.SelectedIndex = phpBin.Items.IndexOf(Settings.Default.PHPVersion);
@@ -94,7 +93,7 @@ namespace Ognmp.UI
             Settings.Default.PHPProcessCount = (uint) PHP_PROCESSES.Value;
             Settings.Default.PHPPort = (ushort) PHP_PORT.Value;
             StartWithWindows();
-            UpdateNgxPHPConfig();
+            UpdateNgxPhpConfig();
             Settings.Default.PHPVersion = phpBin.Text;
             Save_PHPExtOptions();
         }
@@ -147,7 +146,7 @@ namespace Ognmp.UI
                 .ToArray();
         }
 
-        private void UpdateNgxPHPConfig()
+        private void UpdateNgxPhpConfig()
         {
             var port = (short) PHP_PORT.Value;
 
@@ -168,13 +167,13 @@ namespace Ognmp.UI
                 return;
             if (StartWnmpWithWindows.Checked)
             {
-                if (root.GetValue("Wnmp") == null)
-                    root.SetValue("Wnmp", "\"" + Application.ExecutablePath + "\"");
+                if (root.GetValue("Ognmp") == null)
+                    root.SetValue("Ognmp", "\"" + Application.ExecutablePath + "\"");
             }
             else
             {
-                if (root.GetValue("Wnmp") != null)
-                    root.DeleteValue("Wnmp");
+                if (root.GetValue("Ognmp") != null)
+                    root.DeleteValue("Ognmp");
             }
         }
 

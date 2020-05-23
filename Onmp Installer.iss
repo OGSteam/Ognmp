@@ -1,6 +1,6 @@
 ; Wnmp iss
 #define MyAppName "Ognmp"
-#define MyAppVersion "0.0.1"
+#define MyAppVersion "0.0.0"
 #define MyAppPublisher "OGSteam.fr"
 #define MyAppURL "https://ogsteam.fr"
 #define MyAppExeName "Ognmp.exe"
@@ -41,7 +41,7 @@ PrivilegesRequired=admin
 DirExistsWarning=no
 
 [Languages]
-Name: english; MessagesFile: compiler:Default.isl
+Name: french; MessagesFile: compiler:Default.isl
 
 [Tasks]
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
@@ -54,6 +54,8 @@ Source: conf\koi-utf; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\koi-win; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\mime.types; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\nginx.conf; DestDir: {app}\conf; Flags: ignoreversion
+Source: conf\localhost.crt; DestDir: {app}\conf; Flags: ignoreversion
+Source: conf\localhost.key; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\php_processes.conf; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\scgi_params; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\uwsgi_params; DestDir: {app}\conf; Flags: ignoreversion
@@ -65,6 +67,7 @@ Source: mariadb\data\*; Excludes: ".gitignore"; DestDir: {app}\mariadb\data; Fla
 Source: mariadb\include\*; Excludes: ".gitignore"; DestDir: {app}\mariadb\include; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: mariadb\share\*; Excludes: ".gitignore"; DestDir: {app}\mariadb\share; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: php\*; DestDir: {app}\php; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: html\*; DestDir: {app}\html; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: temp\*; DestDir: {app}\temp; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: nginx.exe; DestDir: {app}; Flags: ignoreversion
 Source: README.md; DestDir: {app}; Flags: ignoreversion
