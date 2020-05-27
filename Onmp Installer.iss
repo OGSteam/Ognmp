@@ -1,4 +1,4 @@
-; Wnmp iss
+; Ognmp iss
 #define MyAppName "Ognmp"
 #define MyAppVersion "0.0.0"
 #define MyAppPublisher "OGSteam.fr"
@@ -22,7 +22,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={sd}\{#MyAppName}
 SourceDir=.
 DefaultGroupName={#MyAppName}
-VersionInfoDescription=Wnmp (version {#MyAppVersion})
+VersionInfoDescription=Ognmp (version {#MyAppVersion})
 VersionInfoCopyright=Copyright 2012-2019 Kurt Cancemi Copyright 2019-{#Year} OGSteam.fr
 VersionInfoCompany=OGSteam
 LicenseFile=./LICENSE
@@ -60,7 +60,7 @@ Source: conf\php_processes.conf; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\scgi_params; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\uwsgi_params; DestDir: {app}\conf; Flags: ignoreversion
 Source: conf\win-utf; DestDir: {app}\conf; Flags: ignoreversion
-Source: contrib\*; DestDir: {app}\contrib; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: contribs\*; DestDir: {app}\contribs; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: logs\*; Excludes: ".gitignore"; DestDir: {app}\logs; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: mariadb\bin\*; Excludes: ".gitignore,*.pdb"; DestDir: {app}\mariadb\bin; Flags: ignoreversion
 Source: mariadb\data\*; Excludes: ".gitignore"; DestDir: {app}\mariadb\data; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -71,6 +71,7 @@ Source: html\*; DestDir: {app}\html; Excludes: ".gitignore"; Flags: ignoreversio
 Source: temp\*; DestDir: {app}\temp; Excludes: ".gitignore"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: nginx.exe; DestDir: {app}; Flags: ignoreversion
 Source: README.md; DestDir: {app}; Flags: ignoreversion
+Source: LICENSE; DestDir: {app}; Flags: ignoreversion
 Source: "vc_redist.x64.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall
 Source: Ognmp/Bin/Release/Ognmp.exe; DestDir: {app}; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -79,6 +80,11 @@ Source: Ognmp/Bin/Release/Ognmp.exe; DestDir: {app}; Flags: ignoreversion
 Name: {group}\{#MyAppName}; Filename: {app}\{#MyAppExeName}
 Name: {group}\{cm:UninstallProgram,{#MyAppName}}; Filename: {uninstallexe}
 Name: {commondesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon
+
+[Registry]
+Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
+    ValueType: String; ValueName: "{app}\Ognmp.exe"; ValueData: "RUNASADMIN"; \
+    Flags: uninsdeletekeyifempty uninsdeletevalue; MinVersion: 0,6.1
 
 [Run]
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}; Flags: nowait postinstall shellexec
