@@ -1,6 +1,6 @@
 ; Ognmp iss
 #define MyAppName "Ognmp"
-#define MyAppVersion "0.0.0"
+#define MyAppVersion "0.1.0"
 #define MyAppPublisher "OGSteam.fr"
 #define MyAppURL "https://ogsteam.fr"
 #define MyAppExeName "Ognmp.exe"
@@ -13,8 +13,8 @@
 AppId={{8243F191-2683-42E0-86C2-6845851856F7}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;SignTool=tools
-;AppVerName={#MyAppName} {#MyAppVersion}
+;SignTool=tools $f
+AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
@@ -80,11 +80,6 @@ Source: Ognmp/Bin/Release/Ognmp.exe; DestDir: {app}; Flags: ignoreversion
 Name: {group}\{#MyAppName}; Filename: {app}\{#MyAppExeName}
 Name: {group}\{cm:UninstallProgram,{#MyAppName}}; Filename: {uninstallexe}
 Name: {commondesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon
-
-[Registry]
-Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers"; \
-    ValueType: String; ValueName: "{app}\Ognmp.exe"; ValueData: "RUNASADMIN"; \
-    Flags: uninsdeletekeyifempty uninsdeletevalue; MinVersion: 0,6.1
 
 [Run]
 Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}; Flags: nowait postinstall shellexec
