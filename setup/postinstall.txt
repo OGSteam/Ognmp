@@ -3,3 +3,5 @@ Welcome to Ognmp!
 
 For configuration and usage directions, please read the README.md
 file that comes with this package.
+
+You need to Run the Manager as Admin to be able to run MariaDB.
