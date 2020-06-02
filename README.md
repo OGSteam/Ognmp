@@ -1,4 +1,4 @@
-# Ognmp
+# OGnmp
 
 Nginx MariaDB PHP Stack for OGSteam.
 Run the application as Administrator to be able to start MariaDB
@@ -7,9 +7,14 @@ Run the application as Administrator to be able to start MariaDB
 
 - Run installer
 - Put your files into the html folder
-- Run Ognmp as ADministrator
+- Run Ognmp as Administrator
 - Start All Services
 - Run in your favorite Browser <https://localhost/yourwebsitefolder>
+
+## Defaults
+
+- NGNIX will use by default Ports 80 (http) and 443 (https)
+- Maria DB will have a first account configured : root with password set as 'password'
 
 ## Configuration
 
