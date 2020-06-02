@@ -82,6 +82,6 @@ Name: {group}\{cm:UninstallProgram,{#MyAppName}}; Filename: {uninstallexe}
 Name: {commondesktop}\{#MyAppName}; Filename: {app}\{#MyAppExeName}; Tasks: desktopicon
 
 [Run]
-Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}; Flags: nowait postinstall shellexec
+Filename: {app}\{#MyAppExeName}; Description: {cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}; Flags: nowait postinstall shellexec runascurrentuser 
 Filename: "{tmp}\vc_redist.x64.exe"; Parameters: "/install /passive /norestart"
 Filename: "{app}\mariadb\bin\mysql_install_db.exe"; Parameters: "--password=password"
