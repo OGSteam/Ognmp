@@ -61,7 +61,7 @@ namespace Ognmp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Wnmp Version: .
+        ///   Looks up a localized string similar to Ognmp Version: .
         /// </summary>
         internal static string AboutFrm_Wnmp_Version__ {
             get {

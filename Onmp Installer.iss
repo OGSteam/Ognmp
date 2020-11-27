@@ -1,10 +1,17 @@
 ; Ognmp iss
 #define MyAppName "Ognmp"
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "0.2.0"
 #define MyAppPublisher "OGSteam.fr"
 #define MyAppURL "https://ogsteam.fr"
 #define MyAppExeName "Ognmp.exe"
 #define Year "2020"
+
+;Signature
+; Menu Tools -> Sign Tool
+; Create an entry with :
+; name = signtool
+; parameters = signtool.exe sign /f "C:\OGSteam.fr.p12" /t http://timestamp.comodoca.com/authenticode /p "*******" $f
+; you need signtool application and to generate the CA with Windows Server
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -13,7 +20,7 @@
 AppId={{8243F191-2683-42E0-86C2-6845851856F7}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;SignTool=tools $f
+SignTool=signtool
 AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}

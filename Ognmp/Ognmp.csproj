@@ -48,25 +48,25 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>OGnmp.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>ogsteam.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>OGSteam.fr.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestTimestampUrl>http://timestamp.comodoca.com/authenticode</ManifestTimestampUrl>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>9A11A4B3CEB5D58B1CF65B2FC99E9DC998E3BF1C</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>38436C727315F431145E23871E0B44A5BB3DAB33</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>ogsteam.pfx</ManifestKeyFile>
+    <ManifestKeyFile>OGSteam.fr.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>Custom</TargetZone>
@@ -149,6 +149,8 @@
     <EmbeddedResource Include="UI\OptionsFrm.resx">
       <DependentUpon>OptionsFrm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="Ognmp.pfx" />
+    <None Include="OGSteam.fr.pfx" />
     <None Include="ogsteam.pfx" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">

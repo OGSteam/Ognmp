@@ -36,7 +36,7 @@
       <Value Profile="(Default)">80</Value>
     </Setting>
     <Setting Name="PHPVersion" Type="System.String" Scope="User">
-      <Value Profile="(Default)">7.3</Value>
+      <Value Profile="(Default)">8.0</Value>
     </Setting>
   </Settings>
 </SettingsFile>
