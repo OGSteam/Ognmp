@@ -93,17 +93,16 @@ namespace Ognmp
         public static void SetLogComponent(RichTextBox logRichTextBox)
         {
             _rtfLog = logRichTextBox;
-            // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-            var logContextMenu = new ContextMenu();
-            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+            
+            var logContextMenu = new ContextMenuStrip();
             var copyItem = new ToolStripMenuItem("&Copy");
             copyItem.Click += (s, e) =>
             {
                 if (_rtfLog.SelectedText != string.Empty)
                     Clipboard.SetText(_rtfLog.SelectedText);
             };
-            logContextMenu.MenuItems.Add(copyItem);
-            _rtfLog.ContextMenu = logContextMenu;
+            logContextMenu.Items.Add(copyItem);
+            _rtfLog.ContextMenuStrip = logContextMenu;
         }
     }
 }

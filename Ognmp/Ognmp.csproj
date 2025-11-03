@@ -19,17 +19,16 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <ApplicationIcon>OGnmp.ico</ApplicationIcon>
-    <SignManifests>true</SignManifests>
-    <AssemblyOriginatorKeyFile>OGSteam.fr.pfx</AssemblyOriginatorKeyFile>
-    <ManifestTimestampUrl>http://timestamp.comodoca.com/authenticode</ManifestTimestampUrl>
-    <ManifestCertificateThumbprint>38436C727315F431145E23871E0B44A5BB3DAB33</ManifestCertificateThumbprint>
-    <ManifestKeyFile>OGSteam.fr.pfx</ManifestKeyFile>
+    <SignManifests>false</SignManifests>
     <TargetZone>Custom</TargetZone>
     <GenerateManifests>true</GenerateManifests>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.0" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Ognmp.pfx" />
     <None Include="OGSteam.fr.pfx" />

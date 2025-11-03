@@ -212,7 +212,6 @@ namespace Ognmp.UI
 
         private void SetupTrayMenu()
         {
-            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
             var controlpanel = new ToolStripMenuItem("Ognmp Control Panel");
             controlpanel.Click += (s, e) =>
             {
@@ -221,20 +220,21 @@ namespace Ognmp.UI
                 WindowState = FormWindowState.Normal;
                 Show();
             };
-            // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-            var cm = new ContextMenu();
-            cm.MenuItems.Add(controlpanel);
-            cm.MenuItems.Add("-");
-            cm.MenuItems.Add(CreateWnmpProgramMenuItem(_nginx));
-            cm.MenuItems.Add(CreateWnmpProgramMenuItem(_mariaDb));
-            cm.MenuItems.Add(CreateWnmpProgramMenuItem(_php));
-            cm.MenuItems.Add("-");
-            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+            
+            var cm = new ContextMenuStrip();
+            cm.Items.Add(controlpanel);
+            cm.Items.Add(new ToolStripSeparator());
+            cm.Items.Add(CreateWnmpProgramMenuItem(_nginx));
+            cm.Items.Add(CreateWnmpProgramMenuItem(_mariaDb));
+            cm.Items.Add(CreateWnmpProgramMenuItem(_php));
+            cm.Items.Add(new ToolStripSeparator());
+            
             var exit = new ToolStripMenuItem("Exit");
             exit.Click += (s, e) => { Application.Exit(); };
-            cm.MenuItems.Add(exit);
-            cm.MenuItems.Add("-");
-            _ni.ContextMenu = cm;
+            cm.Items.Add(exit);
+            cm.Items.Add(new ToolStripSeparator());
+            
+            _ni.ContextMenuStrip = cm;
             _ni.Icon = Resources.Ognmp;
             _ni.Click += (s, e) =>
             {
