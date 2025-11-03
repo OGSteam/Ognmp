@@ -230,7 +230,7 @@ namespace Ognmp.UI
             cm.MenuItems.Add(CreateWnmpProgramMenuItem(_php));
             cm.MenuItems.Add("-");
             // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-            var exit = new MenuItem("Exit");
+            var exit = new ToolStripMenuItem("Exit");
             exit.Click += (s, e) => { Application.Exit(); };
             cm.MenuItems.Add(exit);
             cm.MenuItems.Add("-");
