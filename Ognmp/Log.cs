@@ -96,7 +96,7 @@ namespace Ognmp
             // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
             var logContextMenu = new ContextMenu();
             // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-            var copyItem = new MenuItem("&Copy");
+            var copyItem = new ToolStripMenuItem("&Copy");
             copyItem.Click += (s, e) =>
             {
                 if (_rtfLog.SelectedText != string.Empty)
