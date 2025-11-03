@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -19,35 +19,15 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-  </PropertyGroup>
-  <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <ApplicationIcon>OGnmp.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup>
     <SignManifests>true</SignManifests>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>OGSteam.fr.pfx</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
     <ManifestTimestampUrl>http://timestamp.comodoca.com/authenticode</ManifestTimestampUrl>
-  </PropertyGroup>
-  <PropertyGroup>
     <ManifestCertificateThumbprint>38436C727315F431145E23871E0B44A5BB3DAB33</ManifestCertificateThumbprint>
-  </PropertyGroup>
-  <PropertyGroup>
     <ManifestKeyFile>OGSteam.fr.pfx</ManifestKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
     <TargetZone>Custom</TargetZone>
-  </PropertyGroup>
-  <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
-  </PropertyGroup>
-  <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
