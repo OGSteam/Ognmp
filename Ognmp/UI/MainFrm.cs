@@ -191,8 +191,10 @@ namespace Ognmp.UI
         }
 
 
-        private MenuItem CreateWnmpProgramMenuItem(OgnmpProgram prog)
+        private // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
+MenuItem CreateWnmpProgramMenuItem(OgnmpProgram prog)
         {
+            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
             var item = new MenuItem {Text = Log.LogSectionToString(prog.ProgLogSection)};
 
             var start = item.MenuItems.Add("Start");
@@ -207,6 +209,7 @@ namespace Ognmp.UI
 
         private void SetupTrayMenu()
         {
+            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
             var controlpanel = new MenuItem("Ognmp Control Panel");
             controlpanel.Click += (s, e) =>
             {
@@ -215,6 +218,7 @@ namespace Ognmp.UI
                 WindowState = FormWindowState.Normal;
                 Show();
             };
+            // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
             var cm = new ContextMenu();
             cm.MenuItems.Add(controlpanel);
             cm.MenuItems.Add("-");
@@ -222,6 +226,7 @@ namespace Ognmp.UI
             cm.MenuItems.Add(CreateWnmpProgramMenuItem(_mariaDb));
             cm.MenuItems.Add(CreateWnmpProgramMenuItem(_php));
             cm.MenuItems.Add("-");
+            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
             var exit = new MenuItem("Exit");
             exit.Click += (s, e) => { Application.Exit(); };
             cm.MenuItems.Add(exit);

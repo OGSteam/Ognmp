@@ -93,7 +93,9 @@ namespace Ognmp
         public static void SetLogComponent(RichTextBox logRichTextBox)
         {
             _rtfLog = logRichTextBox;
+            // TODO ContextMenu is no longer supported. Use ContextMenuStrip instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
             var logContextMenu = new ContextMenu();
+            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
             var copyItem = new MenuItem("&Copy");
             copyItem.Click += (s, e) =>
             {
