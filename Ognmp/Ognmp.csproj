@@ -31,9 +31,6 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.ServiceProcess" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Ognmp.pfx" />
     <None Include="OGSteam.fr.pfx" />
     <None Include="ogsteam.pfx" />
