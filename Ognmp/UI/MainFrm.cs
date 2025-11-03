@@ -213,7 +213,7 @@ namespace Ognmp.UI
         private void SetupTrayMenu()
         {
             // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-            var controlpanel = new MenuItem("Ognmp Control Panel");
+            var controlpanel = new ToolStripMenuItem("Ognmp Control Panel");
             controlpanel.Click += (s, e) =>
             {
                 _visiblecore = true;
