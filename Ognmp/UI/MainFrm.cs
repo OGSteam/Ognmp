@@ -191,18 +191,21 @@ namespace Ognmp.UI
         }
 
 
-        private // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-MenuItem CreateWnmpProgramMenuItem(OgnmpProgram prog)
+        private ToolStripMenuItem CreateWnmpProgramMenuItem(OgnmpProgram prog)
         {
-            // TODO MenuItem is no longer supported. Use ToolStripMenuItem instead. For more details see https://docs.microsoft.com/en-us/dotnet/core/compatibility/winforms#removed-controls
-            var item = new MenuItem {Text = Log.LogSectionToString(prog.ProgLogSection)};
+            var item = new ToolStripMenuItem { Text = Log.LogSectionToString(prog.ProgLogSection) };
 
-            var start = item.MenuItems.Add("Start");
+            var start = new ToolStripMenuItem("Start");
             start.Click += (s, e) => { prog.Start(); };
-            var stop = item.MenuItems.Add("Stop");
+            item.DropDownItems.Add(start);
+
+            var stop = new ToolStripMenuItem("Stop");
             stop.Click += (s, e) => { prog.Stop(); };
-            var restart = item.MenuItems.Add("Restart");
+            item.DropDownItems.Add(stop);
+
+            var restart = new ToolStripMenuItem("Restart");
             restart.Click += (s, e) => { prog.Restart(); };
+            item.DropDownItems.Add(restart);
 
             return item;
         }
