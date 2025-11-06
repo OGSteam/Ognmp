@@ -43,7 +43,7 @@ namespace Ognmp.UI
 
         private void wnmpWebsiteLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Misc.StartProcessAsync("https://ogsteam.fr");
+            Misc.StartProcessAsync("https://ogsteam.eu");
         }
     }
 }

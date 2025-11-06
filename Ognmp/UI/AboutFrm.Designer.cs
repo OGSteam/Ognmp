@@ -87,7 +87,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(258, 18);
             this.label2.TabIndex = 8;
-            this.label2.Text = "Copyright (c) 2019 - 2020 OGSteam.fr";
+            this.label2.Text = "Copyright (c) 2019 - 2025 OGSteam";
             // 
             // label1
             // 
@@ -107,7 +107,7 @@
             this.wnmpWebsiteLabel.Size = new System.Drawing.Size(133, 20);
             this.wnmpWebsiteLabel.TabIndex = 6;
             this.wnmpWebsiteLabel.TabStop = true;
-            this.wnmpWebsiteLabel.Text = "https://ogsteam.fr";
+            this.wnmpWebsiteLabel.Text = "https://ogsteam.eu";
             this.wnmpWebsiteLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.wnmpWebsiteLabel_LinkClicked);
             // 
             // copyrightLabel
@@ -171,8 +171,8 @@
             this.richTextBox2.ReadOnly = true;
             this.richTextBox2.Size = new System.Drawing.Size(651, 244);
             this.richTextBox2.TabIndex = 0;
-            this.richTextBox2.Text = "Developers OGSteam.fr\n=========\nDarkNoon <darknoon@darkcity.fr>\n\n\n\nDevelopers Wnm" +
-    "p\n=========\nKurt Cancemi <kurt@x64architecture.com>";
+            this.richTextBox2.Text = "Developers OGSteam\n=========\nDarkNoon <darknoon@darkcity.fr>\n\n\n\nDevelopers " +
+    "Wnmp\n=========\nKurt Cancemi <kurt@x64architecture.com>";
             // 
             // License
             // 

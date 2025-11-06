@@ -4,7 +4,7 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-         UAC Manifest Options
+        <!-- UAC Manifest Options
              If you want to change the Windows User Account Control level replace the 
              requestedExecutionLevel node with one of the following.
 
@@ -15,13 +15,9 @@
             Specifying requestedExecutionLevel element will disable file and registry virtualization. 
             Remove this element if your application requires this virtualization for backwards
             compatibility.
-        
+        -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
-      <applicationRequestMinimum>
-        <defaultAssemblyRequest permissionSetReference="Custom" />
-        <PermissionSet class="System.Security.PermissionSet" version="1" ID="Custom" SameSite="site" />
-      </applicationRequestMinimum>
     </security>
   </trustInfo>
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">

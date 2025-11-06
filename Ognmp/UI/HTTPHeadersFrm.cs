@@ -19,33 +19,43 @@
 // */
 
 using System;
-using System.Net;
+using System.Net.Http;
 using System.Windows.Forms;
 
 namespace Ognmp.UI
 {
     public partial class HttpHeadersFrm : Form
     {
+        private static readonly HttpClient httpClient = new HttpClient();
+
         public HttpHeadersFrm()
         {
             InitializeComponent();
         }
 
-        private void GetHeadersToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void GetHeadersToolStripMenuItem_Click(object sender, EventArgs e)
         {
             httpHeadersListView.Items.Clear();
             try
             {
-                var request = (HttpWebRequest) WebRequest.Create(urlTextBox.Text);
-                request.Method = "GET";
-                request.ContentType = "application/x-www-form-urlencoded";
-                using (var response = request.GetResponse())
+                using (var response = await httpClient.GetAsync(urlTextBox.Text))
                 {
-                    foreach (var str in response.Headers.AllKeys)
+                    foreach (var header in response.Headers)
                     {
-                        var item = new ListViewItem(str);
-                        item.SubItems.Add(response.Headers[str]);
+                        var item = new ListViewItem(header.Key);
+                        item.SubItems.Add(string.Join(", ", header.Value));
                         httpHeadersListView.Items.Add(item);
+                    }
+
+                    // Also include content headers
+                    if (response.Content != null)
+                    {
+                        foreach (var header in response.Content.Headers)
+                        {
+                            var item = new ListViewItem(header.Key);
+                            item.SubItems.Add(string.Join(", ", header.Value));
+                            httpHeadersListView.Items.Add(item);
+                        }
                     }
                 }
             }
