@@ -89,7 +89,15 @@ namespace Ognmp.Programs
             }
 
             StartProcess(ExeFileName, StartArgs, true);
-            Log.Notice("Service installed successfully", ProgLogSection);
+            
+            if (ServiceExists())
+            {
+                Log.Notice("Service installed successfully", ProgLogSection);
+            }
+            else
+            {
+                Log.Error("Service installation failed: Service was not found after installation command.", ProgLogSection);
+            }
         }
 
         private bool ServiceExists()
@@ -151,6 +159,12 @@ namespace Ognmp.Programs
                 }
 
                 InstallService();
+
+                if (!ServiceExists())
+                {
+                    Log.Error("Cannot start MariaDB: Service installation failed.", ProgLogSection);
+                    return;
+                }
                 
                 // Reinitialize controller to ensure it's fresh
                 _mariaDbController?.Dispose();

@@ -1,23 +1,3 @@
-// /*
-//  * Copyright (c) 2012 - 2017, Kurt Cancemi (kurt@x64architecture.com)
-//  * Copyright (c) 2017 - 2020, OGSteam.fr (darknoon@darkcity.fr)
-//  *
-//  * This file is part of Ognmp.
-//  *
-//  *  Ognmp is free software: you can redistribute it and/or modify
-//  *  it under the terms of the GNU General Public License as published by
-//  *  the Free Software Foundation, either version 3 of the License, or
-//  *  (at your option) any later version.
-//  *
-//  *  Ognmp is distributed in the hope that it will be useful,
-//  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  *  GNU General Public License for more details.
-//  *
-//  *  You should have received a copy of the GNU General Public License
-//  *  along with Ognmp.  If not, see <http://www.gnu.org/licenses/>.
-// */
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,21 +6,29 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Ognmp.Components.Events;
+using Ognmp.Components.Installation;
+using Ognmp.Components.VersionProviders;
 
 namespace Ognmp.Components
 {
     /// <summary>
     /// Manages downloading and installation of server components (Nginx, PHP, MariaDB, phpMyAdmin)
     /// </summary>
-    public class DependencyManager : IDisposable
+    public class DependencyManager : IDependencyManager
     {
         private readonly HttpClient _httpClient;
         private readonly string _baseDirectory;
         private bool _disposed;
+        private readonly Dictionary<string, IVersionProvider> _versionProviders;
+        private readonly ComponentDownloader _componentDownloader;
+        private readonly ComponentInstaller _componentInstaller;
+        private readonly InstallationValidator _installationValidator;
+        private readonly ComponentConfigInitializer _componentConfigInitializer;
 
         public event EventHandler<DownloadProgressEventArgs> DownloadProgressChanged;
         public event EventHandler<ComponentEventArgs> ComponentInstalled;
-        public event EventHandler<ErrorEventArgs> ErrorOccurred;
+        public event EventHandler<DependencyErrorEventArgs> ErrorOccurred;
 
         public DependencyManager(string baseDirectory)
         {
@@ -49,109 +37,206 @@ namespace Ognmp.Components
             {
                 Timeout = TimeSpan.FromMinutes(10)
             };
+
+            _versionProviders = new Dictionary<string, IVersionProvider>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Nginx"] = new NginxVersionProvider(_httpClient),
+                ["PHP"] = new PhpVersionProvider(_httpClient),
+                ["PHP Xdebug"] = new PhpXdebugVersionProvider(_httpClient),
+                ["MariaDB"] = new MariaDbVersionProvider(_httpClient),
+                ["PhpMyAdmin"] = new PhpMyAdminVersionProvider(_httpClient)
+            };
+
+            // Initialize extracted component handlers
+            _componentDownloader = new ComponentDownloader(_httpClient);
+            _componentInstaller = new ComponentInstaller();
+            _installationValidator = new InstallationValidator();
+            _componentConfigInitializer = new ComponentConfigInitializer(_baseDirectory);
+
+            // Wire download progress event from downloader
+            _componentDownloader.ProgressChanged += (s, e) => OnDownloadProgressChanged(e);
         }
 
-        public Dictionary<string, ComponentInfo> AvailableComponents { get; } = new()
+        public Dictionary<string, List<ComponentInfo>> AvailableVersions { get; private set; } = new(StringComparer.OrdinalIgnoreCase);
+
+        public async Task LoadAvailableVersionsAsync(CancellationToken cancellationToken = default)
         {
-            ["Nginx"] = new ComponentInfo
+            AvailableVersions.Clear();
+            Log.Notice("Starting to load component versions in parallel...");
+
+            // Load all version providers in parallel for better performance
+            var loadTasks = _versionProviders.Values
+                .Select(async provider =>
+                {
+                    try
+                    {
+                        Log.Notice($"Loading versions for {provider.ComponentName}...");
+                        var versions = await provider.GetAvailableVersionsAsync(cancellationToken);
+                        
+                        if (versions != null && versions.Any())
+                        {
+                            Log.Notice($"Loaded {versions.Count} version(s) for {provider.ComponentName}");
+                            return (provider.ComponentName, versions);
+                        }
+                        else
+                        {
+                            Log.Warning($"No versions returned for {provider.ComponentName}");
+                            return (provider.ComponentName, new List<ComponentInfo>());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"Failed to load versions for {provider.ComponentName}: {ex.Message}");
+                        if (ex.InnerException != null)
+                        {
+                            Log.Error($"  Inner exception: {ex.InnerException.Message}");
+                        }
+                        return (provider.ComponentName, new List<ComponentInfo>());
+                    }
+                })
+                .ToList();
+
+            // Wait for all providers to complete
+            var results = await Task.WhenAll(loadTasks);
+
+            // Add results to dictionary
+            foreach (var (componentName, versions) in results)
             {
-                Name = "Nginx",
-                Version = "1.25.3",
-                Url = "https://nginx.org/download/nginx-1.25.3.zip",
-                FileName = "nginx-1.25.3.zip",
-                ExtractFolder = "nginx-1.25.3",
-                TargetFolder = "nginx",
-                Description = "High-performance HTTP server and reverse proxy"
-            },
-            ["PHP"] = new ComponentInfo
-            {
-                Name = "PHP",
-                Version = "8.3.1",
-                Url = "https://windows.php.net/downloads/releases/php-8.3.1-Win32-vs16-x64.zip",
-                FileName = "php-8.3.1-Win32-vs16-x64.zip",
-                ExtractFolder = "php-8.3.1",
-                TargetFolder = "php\\8.3",
-                Description = "PHP scripting language runtime"
-            },
-            ["MariaDB"] = new ComponentInfo
-            {
-                Name = "MariaDB",
-                Version = "11.2.2",
-                Url = "https://downloads.mariadb.org/rest-api/mariadb/11.2.2/mariadb-11.2.2-winx64.zip",
-                FileName = "mariadb-11.2.2-winx64.zip",
-                ExtractFolder = "mariadb-11.2.2-winx64",
-                TargetFolder = "mariadb",
-                Description = "MySQL-compatible database server"
-            },
-            ["PhpMyAdmin"] = new ComponentInfo
-            {
-                Name = "phpMyAdmin",
-                Version = "5.2.1",
-                Url = "https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.zip",
-                FileName = "phpMyAdmin-5.2.1-all-languages.zip",
-                ExtractFolder = "phpMyAdmin-5.2.1-all-languages",
-                TargetFolder = "www\\phpmyadmin",
-                Description = "Web-based MySQL administration tool"
+                if (versions.Any())
+                {
+                    AvailableVersions[componentName] = versions;
+                }
             }
-        };
+
+            Log.Notice($"Finished loading versions. Total components loaded: {AvailableVersions.Count}");
+            
+            // List all loaded components
+            foreach (var component in AvailableVersions.Keys)
+            {
+                Log.Notice($"  - {component}");
+            }
+        }
+
+        public List<ComponentInfo> GetVersionsForComponent(string componentName)
+        {
+            return AvailableVersions.TryGetValue(componentName, out var versions) 
+                ? versions 
+                : new List<ComponentInfo>();
+        }
 
         public bool IsComponentInstalled(string componentName)
         {
-            if (!AvailableComponents.TryGetValue(componentName, out var component))
+            if (!AvailableVersions.TryGetValue(componentName, out var versions) || !versions.Any())
                 return false;
 
+            var component = versions.First();
             var targetPath = Path.Combine(_baseDirectory, component.TargetFolder);
             return Directory.Exists(targetPath);
         }
 
         public async Task<bool> DownloadAndInstallComponentAsync(
             string componentName, 
+            string version = null,
             CancellationToken cancellationToken = default)
         {
-            if (!AvailableComponents.TryGetValue(componentName, out var component))
+            if (!AvailableVersions.TryGetValue(componentName, out var versions))
             {
                 OnErrorOccurred($"Unknown component: {componentName}");
                 return false;
             }
 
+            ComponentInfo component;
+            if (string.IsNullOrEmpty(version))
+            {
+                component = versions.First();
+            }
+            else
+            {
+                component = versions.FirstOrDefault(v => v.Version == version);
+                if (component == null)
+                {
+                    OnErrorOccurred($"Version {version} not found for {componentName}");
+                    return false;
+                }
+            }
+
+            // Check if this is a DLL file (like Xdebug)
+            if (component.FileName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+            {
+                return await DownloadAndInstallDllAsync(component, componentName, cancellationToken);
+            }
+
+            // Standard ZIP installation
+            var tempPath = Path.GetTempPath();
+            var downloadPath = Path.Combine(tempPath, component.FileName);
+            var extractPath = Path.Combine(tempPath, "ognmp_extract_" + Guid.NewGuid());
+
             try
             {
-                var tempPath = Path.GetTempPath();
-                var downloadPath = Path.Combine(tempPath, component.FileName);
-                var extractPath = Path.Combine(tempPath, "ognmp_extract_" + Guid.NewGuid());
-
                 // Download
                 Log.Notice($"Downloading {component.Name} {component.Version}...");
-                if (!await DownloadFileAsync(component.Url, downloadPath, componentName, cancellationToken))
+                if (!await _componentDownloader.DownloadAsync(component.Url, downloadPath, componentName, cancellationToken))
                     return false;
 
                 // Extract
                 Log.Notice($"Extracting {component.Name}...");
-                if (!await Task.Run(() => ExtractZipFile(downloadPath, extractPath), cancellationToken))
-                {
-                    CleanupFiles(downloadPath, extractPath);
+                if (!await Task.Run(() => _componentInstaller.ExtractArchive(downloadPath, extractPath), cancellationToken))
                     return false;
-                }
 
                 // Install
                 Log.Notice($"Installing {component.Name}...");
-                var extractedFolder = Path.Combine(extractPath, component.ExtractFolder);
-                var targetPath = Path.Combine(_baseDirectory, component.TargetFolder);
-
-                if (!await Task.Run(() => InstallComponent(extractedFolder, targetPath), cancellationToken))
+                var sourceFolder = string.IsNullOrEmpty(component.ExtractFolder)
+                    ? extractPath
+                    : Path.Combine(extractPath, component.ExtractFolder);
+                
+                // Smart extract: Handle unexpected zip structures
+                if (!Directory.Exists(sourceFolder))
                 {
-                    CleanupFiles(downloadPath, extractPath);
-                    return false;
+                    try
+                    {
+                        var entries = Directory.GetFileSystemEntries(extractPath);
+                        if (entries.Length == 1 && Directory.Exists(entries[0]))
+                        {
+                            Log.Notice($"Expected source folder not found. Auto-detected root folder: {Path.GetFileName(entries[0])}");
+                            sourceFolder = entries[0];
+                        }
+                        else if (entries.Length == 0)
+                        {
+                            OnErrorOccurred($"Extract directory is empty: {extractPath}");
+                            return false;
+                        }
+                        else
+                        {
+                            OnErrorOccurred($"Expected source folder not found and multiple entries detected in: {extractPath}");
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        OnErrorOccurred($"Failed to detect extract directory structure: {ex.Message}");
+                        return false;
+                    }
                 }
 
-                // Cleanup
-                CleanupFiles(downloadPath, extractPath);
+                var targetPath = Path.Combine(_baseDirectory, component.TargetFolder);
+
+                if (!await Task.Run(() => _componentInstaller.InstallFiles(sourceFolder, targetPath), cancellationToken))
+                    return false;
+
+                // Validate installation
+                if (!_installationValidator.Validate(component.Type, targetPath))
+                {
+                    OnErrorOccurred($"Installation validation failed for {componentName}. Critical files missing.");
+                    // Cleanup broken installation
+                    if (Directory.Exists(targetPath)) Directory.Delete(targetPath, true);
+                    return false;
+                }
 
                 OnComponentInstalled(component);
                 Log.Notice($"{component.Name} installed successfully", Log.LogSection.Ognmp);
 
                 // Initialize component-specific configuration
-                await InitializeComponentConfigAsync(componentName);
+                await _componentConfigInitializer.InitializeComponentConfigAsync(componentName, component);
 
                 return true;
             }
@@ -160,196 +245,120 @@ namespace Ognmp.Components
                 OnErrorOccurred($"Failed to install {componentName}: {ex.Message}");
                 return false;
             }
+            finally
+            {
+                _componentInstaller.Cleanup(downloadPath, extractPath);
+            }
         }
 
-        private async Task<bool> DownloadFileAsync(
-            string url, 
-            string outputPath, 
+        private bool ValidateInstallation(ComponentType componentType, string targetPath)
+        {
+            if (string.IsNullOrWhiteSpace(targetPath))
+            {
+                Log.Error("Target path cannot be null or empty for validation");
+                return false;
+            }
+            if (!Directory.Exists(targetPath))
+            {
+                Log.Error($"Target directory not found: {targetPath}");
+                return false;
+            }
+
+            string criticalFile = componentType switch
+            {
+                ComponentType.PHP => "php-cgi.exe",
+                ComponentType.Nginx => "nginx.exe",
+                ComponentType.MariaDB => Path.Combine("bin", "mysqld.exe"),
+                ComponentType.PhpMyAdmin => "index.php",
+                ComponentType.PhpXdebug => null, // DLLs validated differently
+                _ => null
+            };
+
+            if (criticalFile != null)
+            {
+                var fullPath = Path.Combine(targetPath, criticalFile);
+                if (!File.Exists(fullPath)) 
+                {
+                    // Fallback check for MariaDB (renamed in some versions)
+                    if (componentType == ComponentType.MariaDB && File.Exists(Path.Combine(targetPath, "bin", "mariadbd.exe")))
+                        return true;
+
+                    Log.Error($"Critical file not found: {fullPath}");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private async Task<bool> DownloadAndInstallDllAsync(
+            ComponentInfo component,
             string componentName,
             CancellationToken cancellationToken)
         {
+            var tempPath = Path.GetTempPath();
+            var tempFile = Path.Combine(tempPath, Guid.NewGuid() + ".tmp");
+
             try
             {
-                using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                response.EnsureSuccessStatusCode();
+                var targetPath = Path.Combine(_baseDirectory, component.TargetFolder);
+                Directory.CreateDirectory(targetPath);
 
-                var totalBytes = response.Content.Headers.ContentLength ?? -1;
-                var canReportProgress = totalBytes > 0;
+                var targetFile = Path.Combine(targetPath, component.FileName);
 
-                await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-                await using var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+                // Download to temp file first to prevent partial files
+                Log.Notice($"Downloading {component.Name} {component.Version}...");
+                if (!await _componentDownloader.DownloadAsync(component.Url, tempFile, componentName, cancellationToken))
+                    return false;
 
-                var buffer = new byte[8192];
-                long totalRead = 0;
-                int bytesRead;
-
-                while ((bytesRead = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
+                if (File.Exists(targetFile))
                 {
-                    await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
-                    totalRead += bytesRead;
+                    File.Delete(targetFile);
+                }
+                
+                File.Move(tempFile, targetFile);
 
-                    if (canReportProgress)
-                    {
-                        var progressPercentage = (int)((totalRead * 100) / totalBytes);
-                        OnDownloadProgressChanged(componentName, progressPercentage, totalRead, totalBytes);
-                    }
+                OnComponentInstalled(component);
+                Log.Notice($"{component.Name} installed successfully", Log.LogSection.Ognmp);
+
+                // Configure Xdebug in php.ini if applicable
+                if (component.Type == ComponentType.PhpXdebug)
+                {
+                    await _componentConfigInitializer.ConfigureXdebugAsync(component);
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                OnErrorOccurred($"Download failed: {ex.Message}");
+                OnErrorOccurred($"Failed to install {componentName}: {ex.Message}");
                 return false;
             }
-        }
-
-        private bool ExtractZipFile(string zipPath, string extractPath)
-        {
-            try
+            finally
             {
-                Directory.CreateDirectory(extractPath);
-                ZipFile.ExtractToDirectory(zipPath, extractPath);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                OnErrorOccurred($"Extraction failed: {ex.Message}");
-                return false;
+                _componentInstaller.Cleanup(tempFile);
             }
         }
 
-        private bool InstallComponent(string sourcePath, string targetPath)
+        private void OnDownloadProgressChanged(DownloadProgressEventArgs e)
         {
-            try
-            {
-                // Remove existing installation
-                if (Directory.Exists(targetPath))
-                {
-                    Directory.Delete(targetPath, true);
-                }
-
-                // Create parent directory if needed
-                var parentDir = Path.GetDirectoryName(targetPath);
-                if (!string.IsNullOrEmpty(parentDir) && !Directory.Exists(parentDir))
-                {
-                    Directory.CreateDirectory(parentDir);
-                }
-
-                // Move extracted files to target location
-                Directory.Move(sourcePath, targetPath);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                OnErrorOccurred($"Installation failed: {ex.Message}");
-                return false;
-            }
+            DownloadProgressChanged?.Invoke(this, e);
         }
 
-        private async Task InitializeComponentConfigAsync(string componentName)
-        {
-            await Task.Run(() =>
-            {
-                switch (componentName)
-                {
-                    case "Nginx":
-                        InitializeNginxConfig();
-                        break;
-                    case "PHP":
-                        InitializePhpConfig();
-                        break;
-                    case "MariaDB":
-                        InitializeMariaDbConfig();
-                        break;
-                }
-            });
-        }
-
-        private void InitializeNginxConfig()
-        {
-            var confDir = Path.Combine(_baseDirectory, "conf");
-            Directory.CreateDirectory(confDir);
-
-            var nginxConfSource = Path.Combine(_baseDirectory, "nginx", "conf", "nginx.conf");
-            var nginxConfTarget = Path.Combine(confDir, "nginx.conf");
-
-            if (File.Exists(nginxConfSource) && !File.Exists(nginxConfTarget))
-            {
-                File.Copy(nginxConfSource, nginxConfTarget);
-            }
-        }
-
-        private void InitializePhpConfig()
-        {
-            var phpDir = Path.Combine(_baseDirectory, "php", "8.3");
-            var phpIniSource = Path.Combine(phpDir, "php.ini-development");
-            var phpIniTarget = Path.Combine(phpDir, "php.ini");
-
-            if (File.Exists(phpIniSource) && !File.Exists(phpIniTarget))
-            {
-                File.Copy(phpIniSource, phpIniTarget);
-            }
-
-            // Create logs directory
-            var logsDir = Path.Combine(phpDir, "logs");
-            Directory.CreateDirectory(logsDir);
-        }
-
-        private void InitializeMariaDbConfig()
-        {
-            var mariaDbDir = Path.Combine(_baseDirectory, "mariadb");
-            var dataDir = Path.Combine(mariaDbDir, "data");
-            Directory.CreateDirectory(dataDir);
-
-            var myIniPath = Path.Combine(mariaDbDir, "my.ini");
-            if (!File.Exists(myIniPath))
-            {
-                var iniContent = $@"[mysqld]
-port=3306
-datadir={dataDir.Replace("\\", "/")}
-";
-                File.WriteAllText(myIniPath, iniContent);
-            }
-        }
-
-        private void CleanupFiles(params string[] paths)
-        {
-            foreach (var path in paths)
-            {
-                try
-                {
-                    if (File.Exists(path))
-                        File.Delete(path);
-                    else if (Directory.Exists(path))
-                        Directory.Delete(path, true);
-                }
-                catch
-                {
-                    // Ignore cleanup errors
-                }
-            }
-        }
-
-        protected virtual void OnDownloadProgressChanged(string componentName, int percentage, long bytesReceived, long totalBytes)
-        {
-            DownloadProgressChanged?.Invoke(this, new DownloadProgressEventArgs
-            {
-                ComponentName = componentName,
-                ProgressPercentage = percentage,
-                BytesReceived = bytesReceived,
-                TotalBytes = totalBytes
-            });
-        }
-
-        protected virtual void OnComponentInstalled(ComponentInfo component)
+        private void OnComponentInstalled(ComponentInfo component)
         {
             ComponentInstalled?.Invoke(this, new ComponentEventArgs { Component = component });
         }
 
-        protected virtual void OnErrorOccurred(string message)
+        private void OnErrorOccurred(string errorMessage)
         {
-            ErrorOccurred?.Invoke(this, new ErrorEventArgs(new Exception(message)));
+            ErrorOccurred?.Invoke(this, new DependencyErrorEventArgs(errorMessage));
+            Log.Error(errorMessage);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -358,40 +367,11 @@ datadir={dataDir.Replace("\\", "/")}
             {
                 if (disposing)
                 {
-                    _httpClient?.Dispose();
+                    _httpClient.Dispose();
                 }
+
                 _disposed = true;
             }
         }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-    }
-
-    public class ComponentInfo
-    {
-        public string Name { get; set; }
-        public string Version { get; set; }
-        public string Url { get; set; }
-        public string FileName { get; set; }
-        public string ExtractFolder { get; set; }
-        public string TargetFolder { get; set; }
-        public string Description { get; set; }
-    }
-
-    public class DownloadProgressEventArgs : EventArgs
-    {
-        public string ComponentName { get; set; }
-        public int ProgressPercentage { get; set; }
-        public long BytesReceived { get; set; }
-        public long TotalBytes { get; set; }
-    }
-
-    public class ComponentEventArgs : EventArgs
-    {
-        public ComponentInfo Component { get; set; }
     }
 }

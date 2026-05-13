@@ -18,6 +18,7 @@
 //  *  along with Ognmp.  If not, see <http://www.gnu.org/licenses/>.
 // */
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -45,6 +46,8 @@ namespace Ognmp.Programs
         protected void StartProcess(string exe, string args, bool waitforexit = false,
             Dictionary<string, string> envvariables = null)
         {
+            Log.Notice($"Executing: {Path.GetFileName(exe)} {args}".TrimEnd(), ProgLogSection);
+
             var process = new Process
             {
                 StartInfo =
@@ -63,9 +66,60 @@ namespace Ognmp.Programs
                 foreach (var v in envvariables)
                     process.StartInfo.EnvironmentVariables.Add(v.Key, v.Value);
 
-            process.Start();
+            process.OutputDataReceived += (s, e) => LogProcessOutput(e.Data, false);
+            process.ErrorDataReceived += (s, e) => LogProcessOutput(e.Data, true);
+            if (!waitforexit)
+            {
+                process.EnableRaisingEvents = true;
+                process.Exited += (s, e) =>
+                {
+                    try
+                    {
+                        Log.Notice($"{Path.GetFileName(exe)} exited with code {process.ExitCode}", ProgLogSection);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        Log.Notice($"{Path.GetFileName(exe)} exited", ProgLogSection);
+                    }
+                    finally
+                    {
+                        process.Dispose();
+                    }
+                };
+            }
+
+            try
+            {
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            }
+            catch (Exception ex)
+            {
+                process.Dispose();
+                Log.Error(ex, ProgLogSection);
+                throw;
+            }
+
             if (waitforexit)
+            {
                 process.WaitForExit();
+                process.CancelOutputRead();
+                process.CancelErrorRead();
+                Log.Notice($"{Path.GetFileName(exe)} exited with code {process.ExitCode}", ProgLogSection);
+                process.Dispose();
+            }
+        }
+
+        private void LogProcessOutput(string data, bool isError)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                return;
+
+            if (isError)
+                Log.Error(data, ProgLogSection);
+            else
+                Log.Notice(data, ProgLogSection);
         }
 
         public virtual void Start()

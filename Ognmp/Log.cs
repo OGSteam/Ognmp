@@ -19,8 +19,11 @@
 // */
 
 using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Globalization;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Ognmp
@@ -39,6 +42,10 @@ namespace Ognmp
         }
 
         private static RichTextBox _rtfLog;
+        private static readonly object LogFileLock = new object();
+        private static readonly string LogDirectory = Path.Combine(Program.StartupPath, "logs");
+
+        public static string CurrentLogFilePath => Path.Combine(LogDirectory, $"ognmp-{DateTime.Now:yyyyMMdd}.log");
 
         public static string LogSectionToString(LogSection logSection)
         {
@@ -57,13 +64,51 @@ namespace Ognmp
             }
         }
 
-        private static void OgnmpLog(string message, Color color, LogSection logSection)
+        private static string BuildLogLine(string level, string message, LogSection logSection)
         {
             var sectionName = LogSectionToString(logSection);
-            var dateNow = DateTime.Now.ToString(CultureInfo.CurrentCulture);
-            var str = $"{dateNow} [{sectionName}] - {message}\n";
+            var dateNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+            return $"{dateNow} [{level}] [{sectionName}] - {message}";
+        }
+
+        private static void WriteFileLog(string line)
+        {
+            try
+            {
+                lock (LogFileLock)
+                {
+                    Directory.CreateDirectory(LogDirectory);
+                    File.AppendAllText(CurrentLogFilePath, line + Environment.NewLine, Encoding.UTF8);
+                }
+            }
+            catch
+            {
+                // Logging must never crash the control panel.
+            }
+        }
+
+        private static void OgnmpLog(string level, string message, Color color, LogSection logSection)
+        {
+            var str = BuildLogLine(level, message, logSection);
+            WriteFileLog(str);
+
+            if (_rtfLog == null || _rtfLog.IsDisposed)
+                return;
+
+            if (_rtfLog.InvokeRequired)
+            {
+                _rtfLog.Invoke(new Action(() => OgnmpLogToControl(str, color, logSection)));
+                return;
+            }
+
+            OgnmpLogToControl(str, color, logSection);
+        }
+
+        private static void OgnmpLogToControl(string str, Color color, LogSection logSection)
+        {
+            var sectionName = LogSectionToString(logSection);
             var textLength = _rtfLog.TextLength;
-            _rtfLog.AppendText(str);
+            _rtfLog.AppendText(str + Environment.NewLine);
             if (_rtfLog.Find(sectionName, textLength, RichTextBoxFinds.MatchCase) != -1)
             {
                 _rtfLog.SelectionLength = sectionName.Length;
@@ -79,7 +124,26 @@ namespace Ognmp
         /// </summary>
         public static void Error(string message, LogSection logSection = LogSection.Ognmp)
         {
-            OgnmpLog(message, Color.Red, logSection);
+            OgnmpLog("ERROR", message, Color.Red, logSection);
+        }
+
+        public static void Error(Exception exception, LogSection logSection = LogSection.Ognmp)
+        {
+            if (exception == null)
+            {
+                Error("Unknown exception", logSection);
+                return;
+            }
+
+            Error(exception.ToString(), logSection);
+        }
+
+        /// <summary>
+        ///     Log warning
+        /// </summary>
+        public static void Warning(string message, LogSection logSection = LogSection.Ognmp)
+        {
+            OgnmpLog("WARN", message, Color.DarkOrange, logSection);
         }
 
         /// <summary>
@@ -87,7 +151,7 @@ namespace Ognmp
         /// </summary>
         public static void Notice(string message, LogSection section = LogSection.Ognmp)
         {
-            OgnmpLog(message, Color.DarkBlue, section);
+            OgnmpLog("INFO", message, Color.DarkBlue, section);
         }
 
         public static void SetLogComponent(RichTextBox logRichTextBox)
@@ -102,7 +166,34 @@ namespace Ognmp
                     Clipboard.SetText(_rtfLog.SelectedText);
             };
             logContextMenu.Items.Add(copyItem);
+            logContextMenu.Items.Add(new ToolStripSeparator());
+
+            var openLogItem = new ToolStripMenuItem("Open Log File");
+            openLogItem.Click += (s, e) => OpenLogTarget(CurrentLogFilePath);
+            logContextMenu.Items.Add(openLogItem);
+
+            var openLogFolderItem = new ToolStripMenuItem("Open Logs Folder");
+            openLogFolderItem.Click += (s, e) => OpenLogTarget(LogDirectory);
+            logContextMenu.Items.Add(openLogFolderItem);
+
             _rtfLog.ContextMenuStrip = logContextMenu;
+        }
+
+        private static void OpenLogTarget(string path)
+        {
+            try
+            {
+                Directory.CreateDirectory(LogDirectory);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = path,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Error(ex);
+            }
         }
     }
 }

@@ -37,6 +37,8 @@
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hostToIPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getHTTPHeadersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.downloadComponentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.supportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reportBugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -125,7 +127,9 @@
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.hostToIPToolStripMenuItem,
-            this.getHTTPHeadersToolStripMenuItem});
+            this.getHTTPHeadersToolStripMenuItem,
+            this.toolStripSeparator3,
+            this.downloadComponentsToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -133,16 +137,28 @@
             // hostToIPToolStripMenuItem
             // 
             this.hostToIPToolStripMenuItem.Name = "hostToIPToolStripMenuItem";
-            this.hostToIPToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.hostToIPToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.hostToIPToolStripMenuItem.Text = "Host To IP";
             this.hostToIPToolStripMenuItem.Click += new System.EventHandler(this.HostToIPToolStripMenuItem_Click);
             // 
             // getHTTPHeadersToolStripMenuItem
             // 
             this.getHTTPHeadersToolStripMenuItem.Name = "getHTTPHeadersToolStripMenuItem";
-            this.getHTTPHeadersToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.getHTTPHeadersToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.getHTTPHeadersToolStripMenuItem.Text = "Get HTTP Headers";
             this.getHTTPHeadersToolStripMenuItem.Click += new System.EventHandler(this.GetHTTPHeadersToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(197, 6);
+            // 
+            // downloadComponentsToolStripMenuItem
+            // 
+            this.downloadComponentsToolStripMenuItem.Name = "downloadComponentsToolStripMenuItem";
+            this.downloadComponentsToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+            this.downloadComponentsToolStripMenuItem.Text = "Download Components...";
+            this.downloadComponentsToolStripMenuItem.Click += new System.EventHandler(this.DownloadComponentsToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -587,6 +603,8 @@
         private System.Windows.Forms.ToolStripMenuItem supportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reportBugToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem downloadComponentsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem websiteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.Button nginxRestartButton;

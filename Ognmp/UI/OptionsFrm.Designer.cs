@@ -49,6 +49,8 @@
             this.editorTB = new System.Windows.Forms.TextBox();
             this.MinimizeWnmpToTray = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.NGINX_PORT = new System.Windows.Forms.NumericUpDown();
+            this.labelNginxPort = new System.Windows.Forms.Label();
             this.PHP = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.phpExtListBox = new System.Windows.Forms.CheckedListBox();
@@ -68,6 +70,7 @@
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PHP_PROCESSES)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PHP_PORT)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NGINX_PORT)).BeginInit();
             this.SuspendLayout();
             // 
             // Cancel
@@ -120,6 +123,8 @@
             this.applicationSettingsGroupBox.Controls.Add(this.editorTB);
             this.applicationSettingsGroupBox.Controls.Add(this.MinimizeWnmpToTray);
             this.applicationSettingsGroupBox.Controls.Add(this.label4);
+            this.applicationSettingsGroupBox.Controls.Add(this.NGINX_PORT);
+            this.applicationSettingsGroupBox.Controls.Add(this.labelNginxPort);
             this.applicationSettingsGroupBox.Location = new System.Drawing.Point(6, 6);
             this.applicationSettingsGroupBox.Name = "applicationSettingsGroupBox";
             this.applicationSettingsGroupBox.Size = new System.Drawing.Size(327, 240);
@@ -280,6 +285,37 @@
             this.label4.TabIndex = 8;
             this.label4.Text = "Minimize to tray instead of minimizing";
             // 
+            // labelNginxPort
+            // 
+            this.labelNginxPort.AutoSize = true;
+            this.labelNginxPort.Location = new System.Drawing.Point(25, 200);
+            this.labelNginxPort.Name = "labelNginxPort";
+            this.labelNginxPort.Size = new System.Drawing.Size(60, 13);
+            this.labelNginxPort.TabIndex = 26;
+            this.labelNginxPort.Text = "Nginx Port:";
+            // 
+            // NGINX_PORT
+            // 
+            this.NGINX_PORT.Location = new System.Drawing.Point(226, 197);
+            this.NGINX_PORT.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.NGINX_PORT.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.NGINX_PORT.Name = "NGINX_PORT";
+            this.NGINX_PORT.Size = new System.Drawing.Size(69, 20);
+            this.NGINX_PORT.TabIndex = 25;
+            this.NGINX_PORT.Value = new decimal(new int[] {
+            80,
+            0,
+            0,
+            0});
+            // 
             // PHP
             // 
             this.PHP.Controls.Add(this.groupBox3);
@@ -435,6 +471,7 @@
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PHP_PROCESSES)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PHP_PORT)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NGINX_PORT)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -473,5 +510,7 @@
         private System.Windows.Forms.NumericUpDown PHP_PORT;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button Save;
+        private System.Windows.Forms.NumericUpDown NGINX_PORT;
+        private System.Windows.Forms.Label labelNginxPort;
     }
 }

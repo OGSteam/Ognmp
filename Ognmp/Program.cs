@@ -19,6 +19,8 @@
 // */
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Ognmp.UI;
 
@@ -34,9 +36,44 @@ namespace Ognmp
         [STAThread]
         private static void Main()
         {
+            Application.ThreadException += ApplicationThreadException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainUnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskSchedulerUnobservedTaskException;
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Log.Notice("Starting Ognmp");
+            Log.Notice("Log file: " + Log.CurrentLogFilePath);
             Application.Run(new MainFrm());
+            Log.Notice("Ognmp stopped");
+        }
+
+        private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            Log.Error(e.Exception);
+            MessageBox.Show(
+                "An unexpected error occurred. Details were written to:\n" + Log.CurrentLogFilePath,
+                "Ognmp Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+
+        private static void CurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.ExceptionObject is Exception exception)
+            {
+                Log.Error(exception);
+            }
+            else
+            {
+                Log.Error("Unhandled non-exception error: " + e.ExceptionObject);
+            }
+        }
+
+        private static void TaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            Log.Error(e.Exception);
+            e.SetObserved();
         }
     }
 }

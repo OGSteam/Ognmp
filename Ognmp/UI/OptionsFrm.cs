@@ -70,6 +70,7 @@ namespace Ognmp.UI
             PHP_PROCESSES.Value = Settings.Default.PHPProcessCount;
             PHP_PORT.Value = Settings.Default.PHPPort;
             MinimizeToTrayInsteadOfClosing.Checked = Settings.Default.MinimizeInsteadOfClosing;
+            NGINX_PORT.Value = Settings.Default.NginxPort;
             foreach (var str in PhpVersions()) phpBin.Items.Add(str);
 
             phpBin.SelectedIndex = phpBin.Items.IndexOf(Settings.Default.PHPVersion);
@@ -92,8 +93,10 @@ namespace Ognmp.UI
             Settings.Default.MinimizeInsteadOfClosing = MinimizeToTrayInsteadOfClosing.Checked;
             Settings.Default.PHPProcessCount = (uint) PHP_PROCESSES.Value;
             Settings.Default.PHPPort = (ushort) PHP_PORT.Value;
+            Settings.Default.NginxPort = (ushort) NGINX_PORT.Value;
             StartWithWindows();
             UpdateNgxPhpConfig();
+            UpdateNginxConfig();
             Settings.Default.PHPVersion = phpBin.Text;
             Save_PHPExtOptions();
         }
@@ -157,6 +160,30 @@ namespace Ognmp.UI
                 sw.WriteLine("    server 127.0.0.1:" + port + " weight=1;");
                 sw.WriteLine("}");
             }
+        }
+
+        private void UpdateNginxConfig()
+        {
+            var nginxConfPath = Path.Combine(Program.StartupPath, "conf", "nginx.conf");
+            if (!File.Exists(nginxConfPath))
+                return;
+
+            var port = (ushort) NGINX_PORT.Value;
+            var lines = File.ReadAllLines(nginxConfPath);
+
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var trimmed = lines[i].TrimStart();
+                if (trimmed.StartsWith("listen") && !trimmed.Contains("ssl"))
+                {
+                    // Match lines like "listen 80;" or "listen 80; # IPv4"
+                    var indent = lines[i].Substring(0, lines[i].Length - trimmed.Length);
+                    lines[i] = $"{indent}listen {port}; # IPv4";
+                    break; // Only update the first (HTTP) listen directive
+                }
+            }
+
+            File.WriteAllLines(nginxConfPath, lines);
         }
 
 

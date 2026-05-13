@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using Ognmp.Properties;
+using System.IO;
 
 namespace Ognmp.Programs
 {
@@ -36,7 +37,7 @@ namespace Ognmp.Programs
 
         private static string GetPhpIniPath()
         {
-            return Program.StartupPath + "/php/" + Settings.Default.PHPVersion + "/php.ini";
+            return Path.Combine(Program.StartupPath, "php", Settings.Default.PHPVersion, "php.ini");
         }
 
         public override void Start()
@@ -48,6 +49,18 @@ namespace Ognmp.Programs
             if (IsRunning())
             {
                 Log.Error("Already running.", ProgLogSection);
+                return;
+            }
+
+            if (!File.Exists(ExeFileName))
+            {
+                Log.Error($"PHP Executable not found at: {ExeFileName}. Please check if PHP is installed and the version matches settings.", ProgLogSection);
+                return;
+            }
+
+            if (!File.Exists(phpini))
+            {
+                Log.Error($"PHP Config file (php.ini) not found at: {phpini}", ProgLogSection);
                 return;
             }
 

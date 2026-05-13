@@ -22,6 +22,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using Ognmp.Components;
 using Ognmp.Programs;
 using Ognmp.Properties; //using System.Text.RegularExpressions;
 
@@ -84,7 +85,7 @@ namespace Ognmp.UI
 
         private void SetupNginx()
         {
-            _nginx = new NginxProgram(Program.StartupPath + "\\nginx.exe")
+            _nginx = new NginxProgram(Program.StartupPath + "\\nginx\\nginx.exe")
             {
                 ProgLogSection = Log.LogSection.Nginx,
                 StartArgs = "",
@@ -266,6 +267,16 @@ namespace Ognmp.UI
         {
             var optionForm = new OptionsFrm(this);
             optionForm.ShowDialog(this);
+        }
+
+        private void DownloadComponentsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using var dependencyManager = new DependencyManager(Program.StartupPath);
+            var dependencyManagerForm = new DependencyManagerForm(dependencyManager)
+            {
+                StartPosition = FormStartPosition.CenterParent
+            };
+            dependencyManagerForm.ShowDialog(this);
         }
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)

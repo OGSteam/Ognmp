@@ -25,24 +25,47 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Ognmp.Components;
+using Ognmp.Components.Events;
 
 namespace Ognmp.UI
 {
     public partial class DependencyManagerForm : Form
     {
-        private readonly DependencyManager _dependencyManager;
+        private readonly IDependencyManager _dependencyManager;
         private CancellationTokenSource _cancellationTokenSource;
 
-        public DependencyManagerForm()
+        public DependencyManagerForm(IDependencyManager dependencyManager)
         {
             InitializeComponent();
-            _dependencyManager = new DependencyManager(Program.StartupPath);
+            _dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager));
             
             _dependencyManager.DownloadProgressChanged += OnDownloadProgressChanged;
             _dependencyManager.ComponentInstalled += OnComponentInstalled;
             _dependencyManager.ErrorOccurred += OnErrorOccurred;
             
-            LoadComponents();
+            Load += async (s, e) => await InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            UpdateStatus("Loading available versions...");
+            SetControlsEnabled(false);
+
+            try
+            {
+                await _dependencyManager.LoadAvailableVersionsAsync();
+                LoadComponents();
+                UpdateStatus("Ready");
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Error loading versions: {ex.Message}");
+                Log.Error($"Failed to initialize dependency manager: {ex.Message}");
+            }
+            finally
+            {
+                SetControlsEnabled(true);
+            }
         }
 
         private void InitializeComponent()
@@ -58,6 +81,9 @@ namespace Ognmp.UI
             this.statusLabel = new Label();
             this.cancelButton = new Button();
             this.closeButton = new Button();
+            this.versionLabel = new Label();
+            this.versionComboBox = new ComboBox();
+            this.refreshButton = new Button();
             
             this.SuspendLayout();
             
@@ -68,6 +94,7 @@ namespace Ognmp.UI
             this.componentsListView.FullRowSelect = true;
             this.componentsListView.GridLines = true;
             this.componentsListView.Location = new Point(12, 12);
+            this.componentsListView.MultiSelect = false;
             this.componentsListView.Name = "componentsListView";
             this.componentsListView.Size = new Size(760, 250);
             this.componentsListView.TabIndex = 0;
@@ -79,8 +106,8 @@ namespace Ognmp.UI
             this.nameColumn.Width = 120;
             
             // versionColumn
-            this.versionColumn.Text = "Version";
-            this.versionColumn.Width = 80;
+            this.versionColumn.Text = "Installed Version";
+            this.versionColumn.Width = 120;
             
             // statusColumn
             this.statusColumn.Text = "Status";
@@ -88,57 +115,85 @@ namespace Ognmp.UI
             
             // descriptionColumn
             this.descriptionColumn.Text = "Description";
-            this.descriptionColumn.Width = 440;
+            this.descriptionColumn.Width = 400;
+            
+            // refreshButton
+            this.refreshButton.Location = new Point(12, 271);
+            this.refreshButton.Name = "refreshButton";
+            this.refreshButton.Size = new Size(90, 30);
+            this.refreshButton.TabIndex = 9;
+            this.refreshButton.Text = "Refresh List";
+            this.refreshButton.Click += RefreshButton_Click;
+            
+            // versionLabel
+            this.versionLabel.AutoSize = true;
+            this.versionLabel.Location = new Point(110, 278);
+            this.versionLabel.Name = "versionLabel";
+            this.versionLabel.Size = new Size(90, 15);
+            this.versionLabel.TabIndex = 7;
+            this.versionLabel.Text = "Select Version:";
+            
+            // versionComboBox
+            this.versionComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.versionComboBox.Enabled = false;
+            this.versionComboBox.FormattingEnabled = true;
+            this.versionComboBox.Location = new Point(200, 275);
+            this.versionComboBox.Name = "versionComboBox";
+            this.versionComboBox.Size = new Size(350, 23);
+            this.versionComboBox.TabIndex = 8;
             
             // installButton
             this.installButton.Enabled = false;
-            this.installButton.Location = new Point(12, 275);
+            this.installButton.Location = new Point(560, 273);
             this.installButton.Name = "installButton";
-            this.installButton.Size = new Size(120, 30);
+            this.installButton.Size = new Size(100, 28);
             this.installButton.TabIndex = 1;
             this.installButton.Text = "Install Selected";
             this.installButton.Click += InstallButton_Click;
             
             // installAllButton
-            this.installAllButton.Location = new Point(145, 275);
+            this.installAllButton.Location = new Point(12, 310);
             this.installAllButton.Name = "installAllButton";
-            this.installAllButton.Size = new Size(120, 30);
+            this.installAllButton.Size = new Size(120, 28);
             this.installAllButton.TabIndex = 2;
-            this.installAllButton.Text = "Install All";
+            this.installAllButton.Text = "Install All (Latest)";
             this.installAllButton.Click += InstallAllButton_Click;
             
             // cancelButton
             this.cancelButton.Enabled = false;
-            this.cancelButton.Location = new Point(280, 275);
+            this.cancelButton.Location = new Point(672, 273);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new Size(120, 30);
+            this.cancelButton.Size = new Size(100, 28);
             this.cancelButton.TabIndex = 3;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.Click += CancelButton_Click;
             
             // closeButton
-            this.closeButton.Location = new Point(652, 275);
+            this.closeButton.Location = new Point(672, 310);
             this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new Size(120, 30);
+            this.closeButton.Size = new Size(100, 28);
             this.closeButton.TabIndex = 4;
             this.closeButton.Text = "Close";
             this.closeButton.Click += (s, e) => Close();
             
             // progressBar
-            this.progressBar.Location = new Point(12, 320);
+            this.progressBar.Location = new Point(12, 348);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new Size(760, 23);
             this.progressBar.TabIndex = 5;
             
             // statusLabel
             this.statusLabel.AutoSize = true;
-            this.statusLabel.Location = new Point(12, 350);
+            this.statusLabel.Location = new Point(12, 378);
             this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new Size(0, 15);
+            this.statusLabel.Size = new Size(39, 15);
             this.statusLabel.TabIndex = 6;
+            this.statusLabel.Text = "Ready";
             
             // DependencyManagerForm
-            this.ClientSize = new Size(784, 381);
+            this.ClientSize = new Size(784, 410);
+            this.Controls.Add(this.versionComboBox);
+            this.Controls.Add(this.versionLabel);
             this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.closeButton);
@@ -146,6 +201,7 @@ namespace Ognmp.UI
             this.Controls.Add(this.installAllButton);
             this.Controls.Add(this.installButton);
             this.Controls.Add(this.componentsListView);
+            this.Controls.Add(this.refreshButton);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -169,18 +225,27 @@ namespace Ognmp.UI
         private Button closeButton;
         private ProgressBar progressBar;
         private Label statusLabel;
+        private Label versionLabel;
+        private ComboBox versionComboBox;
+        private Button refreshButton;
 
         private void LoadComponents()
         {
             componentsListView.Items.Clear();
             
-            foreach (var component in _dependencyManager.AvailableComponents.Values)
+            foreach (var componentGroup in _dependencyManager.AvailableVersions)
             {
-                var item = new ListViewItem(component.Name);
-                item.SubItems.Add(component.Version);
+                var componentName = componentGroup.Key;
+                var versions = componentGroup.Value;
+                var latestVersion = versions.First();
+
+                var item = new ListViewItem(componentName);
                 
-                var isInstalled = _dependencyManager.IsComponentInstalled(component.Name);
-                var statusText = isInstalled ? "? Installed" : "Not Installed";
+                var isInstalled = _dependencyManager.IsComponentInstalled(componentName);
+                var versionText = isInstalled ? latestVersion.Version : "Not installed";
+                item.SubItems.Add(versionText);
+                
+                var statusText = isInstalled ? "Installed" : "Not Installed";
                 var statusItem = item.SubItems.Add(statusText);
                 
                 if (isInstalled)
@@ -188,8 +253,8 @@ namespace Ognmp.UI
                 else
                     statusItem.ForeColor = Color.Red;
                 
-                item.SubItems.Add(component.Description);
-                item.Tag = component.Name;
+                item.SubItems.Add(latestVersion.Description);
+                item.Tag = componentName;
                 
                 componentsListView.Items.Add(item);
             }
@@ -197,7 +262,35 @@ namespace Ognmp.UI
 
         private void ComponentsListView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            installButton.Enabled = componentsListView.SelectedItems.Count > 0;
+            var hasSelection = componentsListView.SelectedItems.Count > 0;
+            installButton.Enabled = hasSelection;
+            versionComboBox.Enabled = hasSelection;
+            
+            if (hasSelection)
+            {
+                var componentName = componentsListView.SelectedItems[0].Tag.ToString();
+                LoadVersionsForComponent(componentName);
+            }
+            else
+            {
+                versionComboBox.Items.Clear();
+            }
+        }
+
+        private void LoadVersionsForComponent(string componentName)
+        {
+            versionComboBox.Items.Clear();
+            
+            var versions = _dependencyManager.GetVersionsForComponent(componentName);
+            foreach (var version in versions)
+            {
+                versionComboBox.Items.Add($"{version.Version} - {version.Description}");
+            }
+            
+            if (versionComboBox.Items.Count > 0)
+            {
+                versionComboBox.SelectedIndex = 0;
+            }
         }
 
         private async void InstallButton_Click(object sender, EventArgs e)
@@ -205,48 +298,59 @@ namespace Ognmp.UI
             if (componentsListView.SelectedItems.Count == 0)
                 return;
 
-            var componentNames = componentsListView.SelectedItems
-                .Cast<ListViewItem>()
-                .Select(item => item.Tag.ToString())
-                .ToList();
+            var componentName = componentsListView.SelectedItems[0].Tag.ToString();
+            var versions = _dependencyManager.GetVersionsForComponent(componentName);
+            
+            if (versionComboBox.SelectedIndex < 0 || versionComboBox.SelectedIndex >= versions.Count)
+            {
+                MessageBox.Show("Please select a version", "Version Required", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-            await InstallComponentsAsync(componentNames);
+            var selectedVersion = versions[versionComboBox.SelectedIndex].Version;
+            await InstallComponentAsync(componentName, selectedVersion);
         }
 
         private async void InstallAllButton_Click(object sender, EventArgs e)
         {
-            var componentNames = _dependencyManager.AvailableComponents.Keys.ToList();
-            await InstallComponentsAsync(componentNames);
+            var componentNames = _dependencyManager.AvailableVersions.Keys.ToList();
+            
+            foreach (var componentName in componentNames)
+            {
+                await InstallComponentAsync(componentName, null); // null = use latest
+                if (_cancellationTokenSource?.Token.IsCancellationRequested == true)
+                    break;
+            }
         }
 
-        private async Task InstallComponentsAsync(System.Collections.Generic.List<string> componentNames)
+        private async Task InstallComponentAsync(string componentName, string version)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             SetControlsEnabled(false);
             
             try
             {
-                foreach (var componentName in componentNames)
+                var versionText = version ?? "latest";
+                UpdateStatus($"Installing {componentName} {versionText}...");
+                progressBar.Value = 0;
+                
+                var success = await _dependencyManager.DownloadAndInstallComponentAsync(
+                    componentName,
+                    version,
+                    _cancellationTokenSource.Token);
+                
+                if (!success && !_cancellationTokenSource.Token.IsCancellationRequested)
                 {
-                    UpdateStatus($"Installing {componentName}...");
-                    progressBar.Value = 0;
-                    
-                    var success = await _dependencyManager.DownloadAndInstallComponentAsync(
-                        componentName, 
-                        _cancellationTokenSource.Token);
-                    
-                    if (!success && !_cancellationTokenSource.Token.IsCancellationRequested)
-                    {
-                        MessageBox.Show(
-                            $"Failed to install {componentName}. Check the log for details.",
-                            "Installation Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error);
-                    }
+                    MessageBox.Show(
+                        $"Failed to install {componentName}. Check the log for details.",
+                        "Installation Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                 }
                 
                 LoadComponents();
-                UpdateStatus("Installation completed");
+                UpdateStatus($"{componentName} installation completed");
                 progressBar.Value = 100;
             }
             catch (OperationCanceledException)
@@ -295,7 +399,7 @@ namespace Ognmp.UI
             LoadComponents();
         }
 
-        private void OnErrorOccurred(object sender, System.IO.ErrorEventArgs e)
+        private void OnErrorOccurred(object sender, DependencyErrorEventArgs e)
         {
             if (InvokeRequired)
             {
@@ -303,7 +407,7 @@ namespace Ognmp.UI
                 return;
             }
             
-            UpdateStatus($"Error: {e.GetException().Message}");
+            UpdateStatus($"Error: {e.Message}");
         }
 
         private void UpdateStatus(string message)
@@ -316,9 +420,11 @@ namespace Ognmp.UI
         {
             installButton.Enabled = enabled && componentsListView.SelectedItems.Count > 0;
             installAllButton.Enabled = enabled;
+            refreshButton.Enabled = enabled;
             cancelButton.Enabled = !enabled;
             closeButton.Enabled = enabled;
             componentsListView.Enabled = enabled;
+            versionComboBox.Enabled = enabled && componentsListView.SelectedItems.Count > 0;
         }
 
         private void DependencyManagerForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -341,6 +447,23 @@ namespace Ognmp.UI
             }
             
             _dependencyManager?.Dispose();
+        }
+
+        private async void RefreshButton_Click(object sender, EventArgs e)
+        {
+            UpdateStatus("Refreshing component list...");
+
+            try
+            {
+                await _dependencyManager.LoadAvailableVersionsAsync();
+                LoadComponents();
+                UpdateStatus("Component list refreshed");
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"Error refreshing list: {ex.Message}");
+                Log.Error($"Failed to refresh component list: {ex.Message}");
+            }
         }
     }
 }

@@ -29,7 +29,16 @@ namespace Ognmp
     {
         public static void StartProcessAsync(string filename, string args = "")
         {
-            new Thread(() => { Process.Start(filename, args); }).Start();
+            new Thread(() => 
+            { 
+                var psi = new ProcessStartInfo
+                {
+                    FileName = filename,
+                    Arguments = args,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }).Start();
         }
 
         public static void OpenFileEditor(string file)
